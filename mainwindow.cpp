@@ -94,36 +94,7 @@ MainWindow::MainWindow(QWidget *parent)
         renderer->AddActor(actor);
     }
 
-//    vtkNew<vtkPolyDataMapper> mapper;
-//    mapper->SetInputConnection(sphere->GetOutputPort());
-//
-//    vtkNew<vtkPolyDataMapper> mapper2;
-//    mapper2->SetInputConnection(sphere->GetOutputPort());
-//
-//    vtkNew<vtkActor> actor;
-//    actor->SetMapper(mapper);
-//
-//    vtkNew<vtkActor> actor2;
-//    actor2->SetMapper(mapper2);
-
-
-//    renderer->AddActor(actor);
-//    renderer->AddActor(actor2);
-
     vtk_window->AddRenderer(renderer);
-
-//    vtk_window->GetInteractor()->RemoveAllObservers();
-//    vtk_window->GetInteractor()->AddObserver()
-
-//    vtkNew<QVTKInteractor> interactor;
-//    interactor->SetRenderWindow(vtk_window);
-
-//    vtkNew<vtkInteractorStyleSwitch> style;
-
-//    interactor->SetInteractorStyle(style);
-
-//    interactor->Start();
-
 }
 
 MainWindow::~MainWindow() = default;
