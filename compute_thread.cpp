@@ -27,19 +27,17 @@ void ComputeThread::do_step(double step_dt) {
     if (!isRunning()) {
         start(LowPriority);
     } else {
-        std::cerr << "Attempt to invoke an already running worker thread" << std::endl;
-        exit(EXIT_FAILURE);
-//        restart = true;
-//        condition.wakeOne();
+        advance = true;
+        condition.wakeOne();
     }
 }
 
-[[noreturn]] void ComputeThread::run() {
+void ComputeThread::run() {
     forever {
         // Perform iterations...
         for (int i = 0; i < 3; i ++) {
             if (abort)
-                break;
+                return;
 
             mutex.lock();
             std::cout << "Iteration " << i << ", step size " << dt << ", tid " << std::hash<std::thread::id>{}(std::this_thread::get_id()) << std::endl;
@@ -50,9 +48,9 @@ void ComputeThread::do_step(double step_dt) {
         emit step_done("DONE");
 
         mutex.lock();
-        if (!restart)
+        if (!advance)
             condition.wait(&mutex);
-        restart = false;
+        advance = false;
         mutex.unlock();
     }
 }

@@ -36,7 +36,7 @@ private:
     QMutex mutex;
     QWaitCondition condition;
     bool abort = false;
-    bool restart = true;
+    bool advance = true;
     GranularSystem granular_system;
 
     // Parameters received upon "do_step" invocation
