@@ -278,11 +278,6 @@
            <column/>
           </widget>
           <widget class="QPlainTextEdit" name="stdoutBox">
-           <property name="font">
-            <font>
-             <family>Roboto Mono</family>
-            </font>
-           </property>
            <property name="toolTip">
             <string>DEM engine standard output</string>
            </property>

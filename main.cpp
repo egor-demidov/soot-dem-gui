@@ -2,6 +2,7 @@
 
 #include <QApplication>
 #include <QSurfaceFormat>
+#include <QFontDatabase>
 #include <QVTKOpenGLNativeWidget.h>
 
 int main(int argc, char *argv[])

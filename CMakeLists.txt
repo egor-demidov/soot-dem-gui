@@ -46,6 +46,7 @@ set(PROJECT_SOURCES
         mainwindow.h
         mainwindow.ui
         icons/icons.qrc
+        fonts/fonts.qrc
         fsolve.h
         fsolve.cpp
 )

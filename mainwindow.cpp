@@ -33,6 +33,11 @@ MainWindow::MainWindow(QWidget *parent)
     ui->stdoutBox->appendPlainText("Dump: 0 \tKE: 0 \tP: 0 \tL: 0 \tR_g: 3.4247e-07");
     ui->stdoutBox->appendPlainText("Dump: 1 \tKE: 2.46189e-16 \tP: 3.90375e-32 \tL: 1.44021e-38 \tR_g: 3.42415e-07");
 
+    auto id = QFontDatabase::addApplicationFont(":/fonts/RobotoMono-VariableFont_wght.ttf");
+    QString family = QFontDatabase::applicationFontFamilies(id).at(0);
+    QFont monospace(family);
+    ui->stdoutBox->setFont(monospace);
+
     QStringList horizontal_header;
     horizontal_header << "Parameter" << "Type" << "Value";
     ui->parameterTable->setHorizontalHeaderLabels(horizontal_header);
