@@ -1,0 +1,11 @@
+*
+
+!CMakeLists.txt
+!*.cpp
+!*.h
+!*.ui
+!icons/
+!icons/**
+!fonts/
+!fonts/**
+!.gitignore
