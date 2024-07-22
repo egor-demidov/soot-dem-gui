@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>reset.png</file>
     <file>play.png</file>
     <file>play_all.png</file>
     <file>save.png</file>
