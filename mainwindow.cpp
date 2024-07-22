@@ -7,6 +7,8 @@
 #include "./ui_mainwindow.h"
 
 #include <QVTKOpenGLNativeWidget.h>
+#include <QVTKInteractor.h>
+#include <vtkInteractorStyleSwitch.h>
 #include <vtkActor.h>
 #include <vtkDataSetMapper.h>
 #include <vtkPolyDataMapper.h>
@@ -24,7 +26,8 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(std::make_unique<Ui::MainWindow>())
 {
     ui->setupUi(this);
-//    connect(ui->pushButton, &QAbstractButton::clicked, this, &MainWindow::on_pushBtn_clicked);
+
+    //    connect(ui->pushButton, &QAbstractButton::clicked, this, &MainWindow::on_pushBtn_clicked);
 
     ui->stdoutBox->appendPlainText("Loaded an aggregate of size 442");
     ui->stdoutBox->appendPlainText("Dump: 0 \tKE: 0 \tP: 0 \tL: 0 \tR_g: 3.4247e-07");
@@ -46,6 +49,9 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     parameters[1]->setFlags(Qt::NoItemFlags | Qt::ItemIsEnabled);
+
+    ui->menubar->setNativeMenuBar(true);
+    ui->menubar->addMenu("Menu")->addAction("Abc");
 
 //    auto layout = new QVBoxLayout();
 
@@ -105,6 +111,15 @@ MainWindow::MainWindow(QWidget *parent)
 //    renderer->AddActor(actor2);
 
     vtk_window->AddRenderer(renderer);
+
+//    vtkNew<QVTKInteractor> interactor;
+//    interactor->SetRenderWindow(vtk_window);
+
+//    vtkNew<vtkInteractorStyleSwitch> style;
+
+//    interactor->SetInteractorStyle(style);
+
+//    interactor->Start();
 
 }
 
