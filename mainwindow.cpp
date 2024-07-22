@@ -112,6 +112,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     vtk_window->AddRenderer(renderer);
 
+//    vtk_window->GetInteractor()->RemoveAllObservers();
+//    vtk_window->GetInteractor()->AddObserver()
+
 //    vtkNew<QVTKInteractor> interactor;
 //    interactor->SetRenderWindow(vtk_window);
 
