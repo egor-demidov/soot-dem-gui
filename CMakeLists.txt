@@ -45,6 +45,8 @@ set(PROJECT_SOURCES
         mainwindow.cpp
         mainwindow.h
         mainwindow.ui
+        compute_thread.h
+        compute_thread.cpp
         icons/icons.qrc
         fonts/fonts.qrc
         fsolve.h
