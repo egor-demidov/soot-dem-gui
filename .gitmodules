@@ -1,0 +1,15 @@
+[submodule "deps/soot-dem"]
+	path = deps/soot-dem
+	url = https://github.com/egor-demidov/soot-dem.git
+[submodule "deps/libgran"]
+	path = deps/libgran
+	url = https://github.com/egor-demidov/libgran.git
+[submodule "deps/libtimestep"]
+	path = deps/libtimestep
+	url = https://github.com/egor-demidov/libtimestep.git
+[submodule "deps/tinyxml2"]
+	path = deps/tinyxml2
+	url = https://github.com/leethomason/tinyxml2.git
+[submodule "deps/eigen"]
+	path = deps/eigen
+	url = https://gitlab.com/libeigen/eigen.git

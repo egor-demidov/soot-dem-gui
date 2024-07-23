@@ -30,7 +30,7 @@ signals:
     void step_done(QString const & message);
 
 protected:
-    [[noreturn]] [[noreturn]] void run() override;
+    void run() override;
 
 private:
     QMutex mutex;

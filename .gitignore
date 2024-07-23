@@ -9,3 +9,5 @@
 !fonts/
 !fonts/**
 !.gitignore
+!deps/
+!deps/**

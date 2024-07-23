@@ -51,6 +51,7 @@ set(PROJECT_SOURCES
         fonts/fonts.qrc
         fsolve.h
         fsolve.cpp
+        parameter_set.h
 )
 
 set(CMAKE_NINJA_FORCE_RESPONSE_FILE "ON" CACHE BOOL "Force Ninja to use response files")
