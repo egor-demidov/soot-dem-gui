@@ -26,6 +26,7 @@ public:
     void initialize(std::shared_ptr<Simulation> simulation_ptr);
 
     void do_step();
+    void do_continuous_steps();
 
 signals:
     void step_done(QString const & message,

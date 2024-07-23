@@ -48,23 +48,43 @@ void ComputeThread::do_step() {
     condition.wakeOne();
 }
 
+void ComputeThread::do_continuous_steps() {
+    QMutexLocker locker(&mutex);
+
+    if (!isRunning()) {
+        std::cerr << "Attempting to compute with stopped worker thread" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    if (worker_state != PAUSE) {
+        std::cerr << "Attempting to invoke do_step() on already computing worker thread" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    worker_state = ADVANCE_CONTINUOUS;
+    condition.wakeOne();
+}
+
 void ComputeThread::run() {
     forever {
         mutex.lock();
         auto current_state = worker_state;
         mutex.unlock();
 
-        if (current_state == ADVANCE_ONE) {
+        if (current_state == ADVANCE_ONE || current_state == ADVANCE_CONTINUOUS) {
             auto [message, x] = simulation->perform_iterations();
             emit step_done(QString::fromStdString(message), QVector(x.begin(), x.end()));
-            mutex.lock();
-            worker_state = PAUSE;
-            mutex.unlock();
+
+            if (current_state == ADVANCE_ONE) {
+                mutex.lock();
+                worker_state = PAUSE;
+                mutex.unlock();
+            }
         }
 
         mutex.lock();
-        if (worker_state != ADVANCE_ONE || worker_state != ADVANCE_CONTINUOUS)
+        if (worker_state != ADVANCE_CONTINUOUS) {
             condition.wait(&mutex);
+        }
         mutex.unlock();
     }
 }
