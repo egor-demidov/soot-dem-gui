@@ -67,6 +67,7 @@ public:
 
     RestructuringFixedFractionSimulation(
             std::ostream & output_stream,
+            std::vector<Eigen::Vector3d> & x0_buffer,
             parameter_heap_t const & parameter_heap
     );
 

@@ -44,6 +44,7 @@ std::filesystem::path Simulation::get_path_parameter(std::string const & id) con
 
 RestructuringFixedFractionSimulation::RestructuringFixedFractionSimulation(
             std::ostream & output_stream,
+            std::vector<Eigen::Vector3d> & x0_buffer,
             parameter_heap_t const & parameter_heap
     )
     : Simulation(parameter_heap) {
@@ -122,6 +123,8 @@ RestructuringFixedFractionSimulation::RestructuringFixedFractionSimulation(
     }
     output_stream << "Loaded an aggregate of size " << x0.size() << std::endl;
 
+    x0_buffer = x0;
+
     // Fill the remaining buffers with zeros
     v0.resize(x0.size());
     theta0.resize(x0.size());
@@ -176,5 +179,8 @@ std::tuple<std::string, std::vector<Eigen::Vector3d>> RestructuringFixedFraction
         current_step ++;
     }
 
-    return {"Dump #" + std::to_string(current_step / dump_period), granular_system->get_x()};
+    std::stringstream message_out;
+    message_out << "Dump #" << current_step / dump_period << " \tt: " << double(current_step) * dt;
+
+    return {message_out.str(), granular_system->get_x()};
 }

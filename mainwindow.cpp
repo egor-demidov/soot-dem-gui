@@ -99,6 +99,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     vtk_render_window = vtkNew<vtkGenericOpenGLRenderWindow>();
     vtkRenderWidget->setRenderWindow(vtk_render_window.Get());
+    vtk_renderer = vtkNew<vtkRenderer>();
+    vtk_render_window->AddRenderer(vtk_renderer);
+    vtk_sphere_source = vtkNew<vtkSphereSource>();
+    vtk_sphere_source->SetRadius(1.0);
 }
 
 void MainWindow::play_button_handler() {
@@ -122,9 +126,14 @@ void MainWindow::play_button_handler() {
             }
         }
 
-        simulation = std::make_shared<RestructuringFixedFractionSimulation>(std::cout, parameter_heap);
+        std::stringstream ss;
+        std::vector<Eigen::Vector3d> x0_buffer;
+        simulation = std::make_shared<RestructuringFixedFractionSimulation>(ss, x0_buffer, parameter_heap);
+        ui->stdoutBox->appendPlainText(QString::fromStdString(ss.str()));
 
         compute_thread.initialize(simulation);
+
+        initialize_preview(x0_buffer, 14e-9);
     }
     simulation_state = RUN_ONE;
     update_tool_buttons();
@@ -176,3 +185,40 @@ void MainWindow::update_tool_buttons() {
         }
     }
 }
+
+
+void MainWindow::compute_step_done(QString const & message,
+                       QVector<Eigen::Vector3d> const & x) {
+
+    ui->stdoutBox->appendPlainText(message);
+
+    simulation_state = SimulationState::PAUSE;
+    update_tool_buttons();
+    update_preview(std::vector<Eigen::Vector3d>(x.begin(), x.end()), 14.0e-9);
+}
+
+void MainWindow::initialize_preview(std::vector<Eigen::Vector3d> const & x, double r_part) {
+    vtk_particles_representation.reserve(0);
+    for (size_t i = 0; i < x.size(); i ++) {
+        auto mapper = vtkNew<vtkPolyDataMapper>();
+        mapper->SetInputConnection(vtk_sphere_source->GetOutputPort());
+
+        auto actor = vtkNew<vtkActor>();
+        actor->SetMapper(mapper);
+
+        actor->SetPosition(x[i][0] / r_part, x[i][1] / r_part, x[i][2] / r_part);
+
+        vtk_renderer->AddActor(actor);
+        vtk_particles_representation.emplace_back(mapper, actor);
+    }
+    vtk_renderer->ResetCamera();
+    vtk_render_window->Render();
+}
+
+void MainWindow::update_preview(std::vector<Eigen::Vector3d> const & x, double r_part) {
+    for (size_t i = 0; i < x.size(); i ++) {
+        vtk_particles_representation[i].second->SetPosition(x[i][0] / r_part, x[i][1] / r_part, x[i][2] / r_part);
+    }
+    vtk_render_window->Render();
+}
+

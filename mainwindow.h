@@ -9,6 +9,10 @@
 #include <QTableWidgetItem>
 
 #include <vtkSmartPointer.h>
+#include <vtkSphereSource.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkRenderer.h>
+#include <vtkActor.h>
 #include <vtkGenericOpenGLRenderWindow.h>
 
 #include "compute_thread.h"
@@ -27,11 +31,7 @@ public:
 
 private:
     void compute_step_done(QString const & message,
-                           QVector<Eigen::Vector3d> const & x) {
-        std::cout << "Message received from worker: " << message.toStdString() << std::endl;
-        simulation_state = SimulationState::PAUSE;
-        update_tool_buttons();
-    }
+                           QVector<Eigen::Vector3d> const & x);
 
     void reset_button_handler();
     void play_button_handler();
@@ -41,6 +41,9 @@ private:
 
     void update_tool_buttons();
 
+    void initialize_preview(std::vector<Eigen::Vector3d> const & x, double r_part);
+    void update_preview(std::vector<Eigen::Vector3d> const & x, double r_part);
+
     enum SimulationState {
         RESET, RUN_ONE, RUN_CONTINUOUS, PAUSE
     };
@@ -48,9 +51,17 @@ private:
     std::shared_ptr<Simulation> simulation;
     std::vector<QTableWidgetItem> parameter_table_fields;
     std::unique_ptr<Ui::MainWindow> ui;
-    vtkSmartPointer<vtkGenericOpenGLRenderWindow> vtk_render_window;
     ComputeThread compute_thread;
     SimulationState simulation_state = RESET;
+
+    // VTK stuff
+    vtkSmartPointer<vtkGenericOpenGLRenderWindow> vtk_render_window;
+    vtkSmartPointer<vtkRenderer> vtk_renderer;
+    vtkSmartPointer<vtkSphereSource> vtk_sphere_source;
+    std::vector<std::pair<
+        vtkSmartPointer<vtkPolyDataMapper>,
+        vtkSmartPointer<vtkActor>
+        >> vtk_particles_representation;
 };
 
 #endif // MAINWINDOW_H
