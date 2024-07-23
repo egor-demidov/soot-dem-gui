@@ -56,7 +56,7 @@ void ComputeThread::run() {
 
         if (current_state == ADVANCE_ONE) {
             auto [message, x] = simulation->perform_iterations();
-            emit step_done(QString::fromStdString(message), QVector(x.begin(), x.end()));
+            emit step_done(QString::fromStdString(message), QVector<Eigen::Vector3d>(x.begin(), x.end()));
             mutex.lock();
             worker_state = PAUSE;
             mutex.unlock();

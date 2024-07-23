@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.20)
 
 project(gui_design_soot_dem VERSION 1.0 LANGUAGES CXX C)
 
@@ -7,6 +7,8 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
+
+cmake_policy(SET CMP0060 NEW)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -67,21 +69,21 @@ set(CMAKE_NINJA_FORCE_RESPONSE_FILE "ON" CACHE BOOL "Force Ninja to use response
 
 set(CMAKE_CXX_FLAGS "-O3 -flto=auto -fopenmp ${CMAKE_CXX_FLAGS}")
 
-add_library(tinyxml2 STATIC deps/tinyxml2/tinyxml2.cpp)
-add_library(soot_dem_engine STATIC
-        deps/soot-dem/src/aggregate_stats.cpp
-        deps/soot-dem/src/break_neck.cpp
-        deps/soot-dem/src/energy.cpp
-        deps/soot-dem/src/random_engine.cpp
-        deps/soot-dem/src/reader.cpp
-        deps/soot-dem/src/writer.cpp
+set(MISC_SOURCES
+    deps/tinyxml2/tinyxml2.cpp
+    deps/soot-dem/src/aggregate_stats.cpp
+    deps/soot-dem/src/break_neck.cpp
+    deps/soot-dem/src/energy.cpp
+    deps/soot-dem/src/random_engine.cpp
+    deps/soot-dem/src/reader.cpp
+    deps/soot-dem/src/writer.cpp
 )
 
 add_executable(gui_design_soot_dem
-        ${PROJECT_SOURCES}
+    ${PROJECT_SOURCES} ${MISC_SOURCES}
 )
 
-target_link_libraries(gui_design_soot_dem PRIVATE soot_dem_engine tinyxml2 Qt${QT_VERSION_MAJOR}::Widgets ${VTK_LIBRARIES})
+target_link_libraries(gui_design_soot_dem PRIVATE Qt${QT_VERSION_MAJOR}::Widgets ${VTK_LIBRARIES})
 
 set_target_properties(gui_design_soot_dem PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER soot-dem.edemidov.com
