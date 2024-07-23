@@ -44,6 +44,7 @@ private:
         RESET, RUN_ONE, RUN_CONTINUOUS, PAUSE
     };
 
+    std::shared_ptr<Simulation> simulation;
     std::vector<QTableWidgetItem> parameter_table_fields;
     std::unique_ptr<Ui::MainWindow> ui;
     vtkSmartPointer<vtkGenericOpenGLRenderWindow> vtk_render_window;

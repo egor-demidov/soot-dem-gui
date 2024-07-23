@@ -21,7 +21,7 @@
 #include <vtkRenderer.h>
 #include <vtkSphereSource.h>
 
-#include "parameter_set.h"
+#include "restructuring_fixed_fraction.h"
 
 constexpr const char * parameter_type_to_string(ParameterType type) {
     switch (type) {
@@ -39,7 +39,7 @@ constexpr const char * parameter_type_to_string(ParameterType type) {
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(std::make_unique<Ui::MainWindow>())
-    , parameter_table_fields(N_PARAMETERS_RESTRUCTURING_FIXED_FRACTION * 4)
+    , parameter_table_fields(RestructuringFixedFractionSimulation::N_PARAMETERS * 4)
 {
     ui->setupUi(this);
 
@@ -47,12 +47,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Set up button actions
     connect(&compute_thread, &ComputeThread::step_done, this, &MainWindow::compute_step_done);
-    connect(ui->playButton, &QAbstractButton::clicked, this, [this]() {
-        std::cout << "Calling worker thread" << std::endl;
-        this->simulation_state = SimulationState::RUN_ONE;
-        this->compute_thread.do_step(14.3);
-        this->update_tool_buttons();
-    });
+    connect(ui->playButton, &QAbstractButton::clicked, this, &MainWindow::play_button_handler);
 
     // Load the monospaced font and make stdout box use it
     auto mono_font_id = QFontDatabase::addApplicationFont(":/fonts/RobotoMono-VariableFont_wght.ttf");
@@ -65,15 +60,19 @@ MainWindow::MainWindow(QWidget *parent)
     horizontal_header << "Parameter" << "Type" << "Value" << "Description";
     ui->parameterTable->setHorizontalHeaderLabels(horizontal_header);
 
-    ui->parameterTable->setRowCount(N_PARAMETERS_RESTRUCTURING_FIXED_FRACTION);
+    ui->parameterTable->setRowCount(RestructuringFixedFractionSimulation::N_PARAMETERS);
 
-    for (size_t i = 0; i < N_PARAMETERS_RESTRUCTURING_FIXED_FRACTION; i ++) {
-        auto [id, type, description] = PARAMETERS_RESTRUCTURING_FIXED_FRACTION[i];
+    for (size_t i = 0; i < RestructuringFixedFractionSimulation::N_PARAMETERS; i ++) {
+        auto [id, type, description] = RestructuringFixedFractionSimulation::PARAMETERS[i];
 
         parameter_table_fields[i*4].setText(id);
         parameter_table_fields[i*4].setFlags(Qt::NoItemFlags | Qt::ItemIsEnabled);
         parameter_table_fields[i*4+1].setText(parameter_type_to_string(type));
         parameter_table_fields[i*4+1].setFlags(Qt::NoItemFlags | Qt::ItemIsEnabled);
+
+        // TODO: remove after debugging
+        parameter_table_fields[i*4+2].setText(RestructuringFixedFractionSimulation::default_values[i]);
+
         parameter_table_fields[i*4+3].setText(description);
         parameter_table_fields[i*4+3].setFlags(Qt::NoItemFlags | Qt::ItemIsEnabled);
 
@@ -100,6 +99,36 @@ MainWindow::MainWindow(QWidget *parent)
 
     vtk_render_window = vtkNew<vtkGenericOpenGLRenderWindow>();
     vtkRenderWidget->setRenderWindow(vtk_render_window.Get());
+}
+
+void MainWindow::play_button_handler() {
+    if (simulation_state == RESET) {
+        parameter_heap_t parameter_heap;
+        for (int i = 0; i < RestructuringFixedFractionSimulation::N_PARAMETERS; i ++) {
+            QString value = parameter_table_fields[i*4+2].text();
+            auto [id, type, description] = RestructuringFixedFractionSimulation::PARAMETERS[i];
+            switch (type) {
+                case INTEGER:
+                    parameter_heap[id] = std::make_pair(INTEGER, ParameterValue{.integer_value = value.toInt()});
+                    break;
+                case REAL:
+                    parameter_heap[id] = std::make_pair(REAL, ParameterValue{.real_value = value.toDouble()});
+                    break;
+                case STRING:
+                    parameter_heap[id] = std::make_pair(STRING, ParameterValue{.string_value = value.toStdString()});
+                    break;
+                case PATH:
+                    parameter_heap[id] = std::make_pair(PATH, ParameterValue{.path_value = std::filesystem::path(value.toStdString())});
+            }
+        }
+
+        simulation = std::make_shared<RestructuringFixedFractionSimulation>(std::cout, parameter_heap);
+
+        compute_thread.initialize(simulation);
+    }
+    simulation_state = RUN_ONE;
+    update_tool_buttons();
+    compute_thread.do_step();
 }
 
 MainWindow::~MainWindow() = default;

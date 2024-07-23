@@ -13,6 +13,8 @@
 #include <QWaitCondition>
 #include <QSize>
 
+#include "restructuring_fixed_fraction.h"
+
 struct GranularSystem {
     int passes;
 };
@@ -24,23 +26,26 @@ public:
     ComputeThread(QObject * parent = nullptr);
     ~ComputeThread();
 
-    void do_step(double dt);
+    void initialize(std::shared_ptr<Simulation> simulation_ptr);
+
+    void do_step();
 
 signals:
     void step_done(QString const & message);
 
 protected:
-    void run() override;
+    [[noreturn]] void run() override;
 
 private:
     QMutex mutex;
     QWaitCondition condition;
-    bool abort = false;
-    bool advance = true;
-    GranularSystem granular_system;
+
+    enum {
+        UNINITIALIZED, ADVANCE_ONE, ADVANCE_CONTINUOUS, PAUSE, ABORT
+    } worker_state = UNINITIALIZED;
 
     // Parameters received upon "do_step" invocation
-    double dt = std::numeric_limits<double>::quiet_NaN();
+    std::shared_ptr<Simulation> simulation;
 };
 
 #endif //GUI_DESIGN_SOOT_DEM_COMPUTE_THREAD_H

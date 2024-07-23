@@ -51,19 +51,40 @@ set(PROJECT_SOURCES
         fonts/fonts.qrc
         fsolve.h
         fsolve.cpp
-        parameter_set.h
+        restructuring_fixed_fraction.cpp
+        restructuring_fixed_fraction.h
 )
 
+add_compile_definitions(LIBGRAN_USE_OMP)
+
+include_directories(deps/eigen)
+include_directories(deps/libgran/include)
+include_directories(deps/libtimestep/include)
+include_directories(deps/soot-dem/src)
+include_directories(deps)
+
 set(CMAKE_NINJA_FORCE_RESPONSE_FILE "ON" CACHE BOOL "Force Ninja to use response files")
+
+set(CMAKE_CXX_FLAGS "-O3 -flto=auto -fopenmp ${CMAKE_CXX_FLAGS}")
+
+add_library(tinyxml2 STATIC deps/tinyxml2/tinyxml2.cpp)
+add_library(soot_dem_engine STATIC
+        deps/soot-dem/src/aggregate_stats.cpp
+        deps/soot-dem/src/break_neck.cpp
+        deps/soot-dem/src/energy.cpp
+        deps/soot-dem/src/random_engine.cpp
+        deps/soot-dem/src/reader.cpp
+        deps/soot-dem/src/writer.cpp
+)
 
 add_executable(gui_design_soot_dem
         ${PROJECT_SOURCES}
 )
 
-target_link_libraries(gui_design_soot_dem PRIVATE Qt${QT_VERSION_MAJOR}::Widgets ${VTK_LIBRARIES})
+target_link_libraries(gui_design_soot_dem PRIVATE soot_dem_engine tinyxml2 Qt${QT_VERSION_MAJOR}::Widgets ${VTK_LIBRARIES})
 
 set_target_properties(gui_design_soot_dem PROPERTIES
-    MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
+    MACOSX_BUNDLE_GUI_IDENTIFIER soot-dem.edemidov.com
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE

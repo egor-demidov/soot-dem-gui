@@ -8,49 +8,63 @@
 
 #include "compute_thread.h"
 
-ComputeThread::ComputeThread(QObject * parent) : QThread(parent) {}
+ComputeThread::ComputeThread(QObject * parent)
+    : QThread(parent) {}
 
 ComputeThread::~ComputeThread() {
     mutex.lock();
-    abort = true;
+    worker_state = ABORT;
     condition.wakeOne();
     mutex.unlock();
 
     wait();
 }
 
-void ComputeThread::do_step(double step_dt) {
+void ComputeThread::initialize(std::shared_ptr<Simulation> simulation_ptr) {
     QMutexLocker locker(&mutex);
 
-    this->dt = step_dt;
+    if (worker_state != UNINITIALIZED) {
+        std::cerr << "Attempting to re-initialize an initialized worker thread" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    this->simulation = simulation_ptr;
+    worker_state = PAUSE;
+    start(LowPriority);
+}
+
+void ComputeThread::do_step() {
+    QMutexLocker locker(&mutex);
 
     if (!isRunning()) {
-        start(LowPriority);
-    } else {
-        advance = true;
-        condition.wakeOne();
+        std::cerr << "Attempting to compute with stopped worker thread" << std::endl;
+        exit(EXIT_FAILURE);
     }
+    if (worker_state != PAUSE) {
+        std::cerr << "Attempting to invoke do_step() on already computing worker thread" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    worker_state = ADVANCE_ONE;
+    condition.wakeOne();
 }
 
 void ComputeThread::run() {
     forever {
-        // Perform iterations...
-        for (int i = 0; i < 3; i ++) {
-            if (abort)
-                return;
+        mutex.lock();
+        auto current_state = worker_state;
+        mutex.unlock();
 
+        if (current_state == ADVANCE_ONE) {
+            auto [message, x] = simulation->perform_iterations();
+            emit step_done(QString(message.c_str()));
             mutex.lock();
-            std::cout << "Iteration " << i << ", step size " << dt << ", tid " << std::hash<std::thread::id>{}(std::this_thread::get_id()) << std::endl;
+            worker_state = PAUSE;
             mutex.unlock();
-            std::this_thread::sleep_for(std::chrono::seconds(2));
         }
 
-        emit step_done("DONE");
-
         mutex.lock();
-        if (!advance)
+        if (worker_state != ADVANCE_ONE || worker_state != ADVANCE_CONTINUOUS)
             condition.wait(&mutex);
-        advance = false;
         mutex.unlock();
     }
 }
