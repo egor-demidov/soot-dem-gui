@@ -48,6 +48,7 @@ MainWindow::MainWindow(QWidget *parent)
     // Set up button actions
     connect(&compute_thread, &ComputeThread::step_done, this, &MainWindow::compute_step_done);
     connect(ui->playButton, &QAbstractButton::clicked, this, &MainWindow::play_button_handler);
+    connect(ui->playAllButton, &QAbstractButton::clicked, this, &MainWindow::play_all_button_handler);
 
     // Load the monospaced font and make stdout box use it
     auto mono_font_id = QFontDatabase::addApplicationFont(":/fonts/RobotoMono-VariableFont_wght.ttf");
@@ -140,6 +141,41 @@ void MainWindow::play_button_handler() {
     compute_thread.do_step();
 }
 
+void MainWindow::play_all_button_handler() {
+    if (simulation_state == RESET) {
+        parameter_heap_t parameter_heap;
+        for (int i = 0; i < RestructuringFixedFractionSimulation::N_PARAMETERS; i ++) {
+            QString value = parameter_table_fields[i*4+2].text();
+            auto [id, type, description] = RestructuringFixedFractionSimulation::PARAMETERS[i];
+            switch (type) {
+                case INTEGER:
+                    parameter_heap[id] = std::make_pair(INTEGER, ParameterValue{.integer_value = value.toInt()});
+                    break;
+                case REAL:
+                    parameter_heap[id] = std::make_pair(REAL, ParameterValue{.real_value = value.toDouble()});
+                    break;
+                case STRING:
+                    parameter_heap[id] = std::make_pair(STRING, ParameterValue{.string_value = value.toStdString()});
+                    break;
+                case PATH:
+                    parameter_heap[id] = std::make_pair(PATH, ParameterValue{.path_value = std::filesystem::path(value.toStdString())});
+            }
+        }
+
+        std::stringstream ss;
+        std::vector<Eigen::Vector3d> x0_buffer;
+        simulation = std::make_shared<RestructuringFixedFractionSimulation>(ss, x0_buffer, parameter_heap);
+        ui->stdoutBox->appendPlainText(QString::fromStdString(ss.str()));
+
+        compute_thread.initialize(simulation);
+
+        initialize_preview(x0_buffer, 14e-9);
+    }
+    simulation_state = RUN_CONTINUOUS;
+    update_tool_buttons();
+    compute_thread.do_continuous_steps();
+}
+
 MainWindow::~MainWindow() = default;
 
 void MainWindow::update_tool_buttons() {
@@ -192,8 +228,10 @@ void MainWindow::compute_step_done(QString const & message,
 
     ui->stdoutBox->appendPlainText(message);
 
-    simulation_state = SimulationState::PAUSE;
-    update_tool_buttons();
+    if (simulation_state == SimulationState::RUN_ONE) {
+        simulation_state = SimulationState::PAUSE;
+        update_tool_buttons();
+    }
     update_preview(std::vector<Eigen::Vector3d>(x.begin(), x.end()), 14.0e-9);
 }
 
