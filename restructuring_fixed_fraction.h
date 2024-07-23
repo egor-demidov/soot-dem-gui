@@ -74,6 +74,7 @@ public:
         std::string,
         std::vector<Eigen::Vector3d>> perform_iterations() override;
 
+    // TODO: remove after debugging
     static constexpr const char * default_values[]{
             "1e-19",
             "1e-9",

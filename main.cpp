@@ -9,6 +9,7 @@ int main(int argc, char *argv[])
 {
     QSurfaceFormat::setDefaultFormat(QVTKOpenGLNativeWidget::defaultFormat());
 
+    qRegisterMetaType<QVector<int> >("QVector<Eigen::Vector3d>");
     QApplication a(argc, argv);
     MainWindow w;
     w.show();

@@ -26,7 +26,8 @@ public:
     ~MainWindow() override;
 
 private:
-    void compute_step_done(QString const & message) {
+    void compute_step_done(QString const & message,
+                           QVector<Eigen::Vector3d> const & x) {
         std::cout << "Message received from worker: " << message.toStdString() << std::endl;
         simulation_state = SimulationState::PAUSE;
         update_tool_buttons();

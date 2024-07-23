@@ -15,23 +15,21 @@
 
 #include "restructuring_fixed_fraction.h"
 
-struct GranularSystem {
-    int passes;
-};
 
 class ComputeThread : public QThread {
     Q_OBJECT
 
 public:
-    ComputeThread(QObject * parent = nullptr);
-    ~ComputeThread();
+    explicit ComputeThread(QObject * parent = nullptr);
+    ~ComputeThread() override;
 
     void initialize(std::shared_ptr<Simulation> simulation_ptr);
 
     void do_step();
 
 signals:
-    void step_done(QString const & message);
+    void step_done(QString const & message,
+                   QVector<Eigen::Vector3d> const & x);
 
 protected:
     [[noreturn]] void run() override;
