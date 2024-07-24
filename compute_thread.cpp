@@ -105,6 +105,7 @@ void ComputeThread::run() {
 
         mutex.lock();
         if (worker_state == ABORT) {
+            mutex.unlock();
             return;
         }
         if (worker_state != ADVANCE_CONTINUOUS) {

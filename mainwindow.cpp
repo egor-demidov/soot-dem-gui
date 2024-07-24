@@ -138,6 +138,7 @@ void MainWindow::play_button_handler() {
 
         compute_thread.initialize(simulation);
 
+        // TODO: replace constant r_part with parameter
         initialize_preview(x0_buffer, 14e-9);
     }
     simulation_state = RUN_ONE;
@@ -191,6 +192,7 @@ void MainWindow::reset_button_handler() {
     update_tool_buttons();
     compute_thread.do_terminate();
     reset_preview();
+    ui->stdoutBox->clear();
 }
 
 MainWindow::~MainWindow() = default;
