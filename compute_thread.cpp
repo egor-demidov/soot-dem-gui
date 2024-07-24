@@ -29,7 +29,7 @@ void ComputeThread::initialize(std::shared_ptr<Simulation> simulation_ptr) {
     }
     this->simulation = simulation_ptr;
     worker_state = PAUSE;
-    start(LowPriority);
+    start(HighestPriority);
 }
 
 void ComputeThread::do_step() {

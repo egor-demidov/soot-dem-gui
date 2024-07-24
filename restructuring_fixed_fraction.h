@@ -83,7 +83,7 @@ public:
             "5.6e-08",
             "1.78571e+08",
             "1e-9",
-            "0.8",
+            "0.0",
             "5e-09",
             "1.25e-06",
             "2.5e-10",
@@ -110,11 +110,11 @@ public:
             "1.4e-08",
             "7e-08",
             "1700",
-            "100000",
+            "10000",
             "20",
             "0",
-            "flage",
-            "/run/media/egor/Linux Storage/dem_production_runs/aggregate_bank/size_150/aggregate_0.xml",
+            "mackowski",
+            "aggregate.txt",
     };
     static constexpr std::tuple<const char *, ParameterType, const char *> PARAMETERS[] {
             {"A", REAL, "Hamaker constant"},
