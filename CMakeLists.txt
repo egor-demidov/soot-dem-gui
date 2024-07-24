@@ -53,8 +53,6 @@ set(PROJECT_SOURCES
         compute_thread.cpp
         icons/icons.qrc
         fonts/fonts.qrc
-        fsolve.h
-        fsolve.cpp
         restructuring_fixed_fraction.cpp
         restructuring_fixed_fraction.h
 )
