@@ -1,0 +1,16 @@
+{
+  "dependencies": [
+    {
+      "name": "qtbase",
+      "features": [
+        "widgets"
+      ]
+    },
+    {
+      "name": "vtk",
+      "features": [
+        "qt"
+      ]
+    }
+  ]
+}

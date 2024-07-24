@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.21)
 
 project(gui_design_soot_dem VERSION 1.0 LANGUAGES CXX C)
 
@@ -15,6 +15,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+qt_standard_project_setup()
+
 find_package(VTK COMPONENTS
         CommonCore
         CommonDataModel
@@ -58,6 +60,7 @@ set(PROJECT_SOURCES
 )
 
 add_compile_definitions(LIBGRAN_USE_OMP)
+add_compile_definitions(_USE_MATH_DEFINES)
 
 include_directories(deps/eigen)
 include_directories(deps/libgran/include)
@@ -67,7 +70,7 @@ include_directories(deps)
 
 set(CMAKE_NINJA_FORCE_RESPONSE_FILE "ON" CACHE BOOL "Force Ninja to use response files")
 
-set(CMAKE_CXX_FLAGS "-O3 -flto=auto -fopenmp ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-O3 -flto=auto ${CMAKE_CXX_FLAGS}")
 
 set(MISC_SOURCES
     deps/tinyxml2/tinyxml2.cpp
@@ -101,3 +104,13 @@ vtk_module_autoinit(
     TARGETS gui_design_soot_dem
     MODULES ${VTK_LIBRARIES}
 )
+
+add_custom_command(TARGET gui_design_soot_dem POST_BUILD
+        COMMAND Qt6::windeployqt
+        ARGS $<TARGET_FILE:gui_design_soot_dem>
+)
+
+#add_custom_command(TARGET gui_design_soot_dem POST_BUILD
+#        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:gui_design_soot_dem> $<TARGET_FILE_DIR:gui_design_soot_dem>
+#        COMMAND_EXPAND_LISTS
+#)
