@@ -93,6 +93,9 @@ MainWindow::MainWindow(QWidget *parent)
     QPointer<QVTKOpenGLNativeWidget> vtkRenderWidget =
             new QVTKOpenGLNativeWidget(ui->previewWidget);
 
+    vtkRenderWidget->setAttribute(Qt::WA_AcceptTouchEvents, false);
+    vtkRenderWidget->setAttribute(Qt::WA_NoMousePropagation, true);
+
     QPointer<QVBoxLayout> layout = new QVBoxLayout();
 
     ui->previewWidget->setLayout(layout);
