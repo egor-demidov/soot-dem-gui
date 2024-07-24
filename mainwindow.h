@@ -29,6 +29,8 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
 
+//    void closeEvent(QCloseEvent * event) override;
+
 private:
     void compute_step_done(QString const & message,
                            QVector<Eigen::Vector3d> const & x);
@@ -36,13 +38,14 @@ private:
     void reset_button_handler();
     void play_button_handler();
     void play_all_button_handler();
-    void stop_button_handler();
+    void pause_button_handler();
 
 
     void update_tool_buttons();
 
     void initialize_preview(std::vector<Eigen::Vector3d> const & x, double r_part);
     void update_preview(std::vector<Eigen::Vector3d> const & x, double r_part);
+    void reset_preview();
 
     enum SimulationState {
         RESET, RUN_ONE, RUN_CONTINUOUS, PAUSE

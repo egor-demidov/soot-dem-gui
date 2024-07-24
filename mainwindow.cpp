@@ -49,6 +49,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&compute_thread, &ComputeThread::step_done, this, &MainWindow::compute_step_done);
     connect(ui->playButton, &QAbstractButton::clicked, this, &MainWindow::play_button_handler);
     connect(ui->playAllButton, &QAbstractButton::clicked, this, &MainWindow::play_all_button_handler);
+    connect(ui->pauseButton, &QAbstractButton::clicked, this, &MainWindow::pause_button_handler);
+    connect(ui->resetButton, &QAbstractButton::clicked, this, &MainWindow::reset_button_handler);
 
     // Load the monospaced font and make stdout box use it
     auto mono_font_id = QFontDatabase::addApplicationFont(":/fonts/RobotoMono-VariableFont_wght.ttf");
@@ -104,6 +106,8 @@ MainWindow::MainWindow(QWidget *parent)
     vtk_render_window->AddRenderer(vtk_renderer);
     vtk_sphere_source = vtkNew<vtkSphereSource>();
     vtk_sphere_source->SetRadius(1.0);
+    vtk_sphere_source->SetPhiResolution(30);
+    vtk_sphere_source->SetThetaResolution(15);
 }
 
 void MainWindow::play_button_handler() {
@@ -174,6 +178,19 @@ void MainWindow::play_all_button_handler() {
     simulation_state = RUN_CONTINUOUS;
     update_tool_buttons();
     compute_thread.do_continuous_steps();
+}
+
+void MainWindow::pause_button_handler() {
+    simulation_state = PAUSE;
+    update_tool_buttons();
+    compute_thread.do_pause();
+}
+
+void MainWindow::reset_button_handler() {
+    simulation_state = RESET;
+    update_tool_buttons();
+    compute_thread.do_terminate();
+    reset_preview();
 }
 
 MainWindow::~MainWindow() = default;
@@ -257,6 +274,14 @@ void MainWindow::update_preview(std::vector<Eigen::Vector3d> const & x, double r
     for (size_t i = 0; i < x.size(); i ++) {
         vtk_particles_representation[i].second->SetPosition(x[i][0] / r_part, x[i][1] / r_part, x[i][2] / r_part);
     }
+    vtk_render_window->Render();
+}
+
+void MainWindow::reset_preview() {
+    for (auto [mapper, actor] : vtk_particles_representation) {
+        vtk_renderer->RemoveActor(actor);
+    }
+    vtk_particles_representation.clear();
     vtk_render_window->Render();
 }
 

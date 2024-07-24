@@ -110,19 +110,24 @@ vtk_module_autoinit(
 )
 
 if (${WIN32})
-    add_custom_command(
-            TARGET gui_design_soot_dem POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E make_directory
-            ${CMAKE_BINARY_DIR}/dist/
-            COMMAND ${CMAKE_COMMAND} -E copy
-            $<TARGET_FILE:gui_design_soot_dem>
-            ${CMAKE_BINARY_DIR}/dist/
-    )
-
     add_custom_command(TARGET gui_design_soot_dem POST_BUILD
             COMMAND Qt6::windeployqt
-            ARGS ${CMAKE_BINARY_DIR}/dist/$<TARGET_FILE_NAME:gui_design_soot_dem>
+            ARGS $<TARGET_FILE:gui_design_soot_dem>
     )
+
+#    add_custom_command(
+#            TARGET gui_design_soot_dem POST_BUILD
+#            COMMAND ${CMAKE_COMMAND} -E make_directory
+#            ${CMAKE_BINARY_DIR}/dist/
+#            COMMAND ${CMAKE_COMMAND} -E copy
+#            $<TARGET_FILE:gui_design_soot_dem>
+#            ${CMAKE_BINARY_DIR}/dist/
+#    )
+#
+#    add_custom_command(TARGET gui_design_soot_dem POST_BUILD
+#            COMMAND Qt6::windeployqt
+#            ARGS ${CMAKE_BINARY_DIR}/dist/$<TARGET_FILE_NAME:gui_design_soot_dem>
+#    )
 endif ()
 
 #add_custom_command(TARGET gui_design_soot_dem POST_BUILD

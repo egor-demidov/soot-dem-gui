@@ -27,13 +27,15 @@ public:
 
     void do_step();
     void do_continuous_steps();
+    void do_pause();
+    void do_terminate();
 
 signals:
     void step_done(QString const & message,
                    QVector<Eigen::Vector3d> const & x);
 
 protected:
-    [[noreturn]] void run() override;
+    void run() override;
 
 private:
     QMutex mutex;

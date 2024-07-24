@@ -12,12 +12,7 @@ ComputeThread::ComputeThread(QObject * parent)
     : QThread(parent) {}
 
 ComputeThread::~ComputeThread() {
-    mutex.lock();
-    worker_state = ABORT;
-    condition.wakeOne();
-    mutex.unlock();
-
-    wait();
+    do_terminate();
 }
 
 void ComputeThread::initialize(std::shared_ptr<Simulation> simulation_ptr) {
@@ -64,6 +59,33 @@ void ComputeThread::do_continuous_steps() {
     condition.wakeOne();
 }
 
+void ComputeThread::do_pause() {
+    QMutexLocker locker(&mutex);
+
+    if (!isRunning()) {
+        std::cerr << "Attempting to pause a stopped worker thread" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    if (worker_state != ADVANCE_CONTINUOUS) {
+        std::cerr << "Attempting a pause a worker thread that is not running in continuous mode" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    worker_state = PAUSE;
+}
+
+void ComputeThread::do_terminate() {
+    mutex.lock();
+    worker_state = ABORT;
+    condition.wakeOne();
+    mutex.unlock();
+
+    wait();
+
+    simulation.reset();
+    worker_state = UNINITIALIZED;
+}
+
 void ComputeThread::run() {
     forever {
         mutex.lock();
@@ -82,6 +104,9 @@ void ComputeThread::run() {
         }
 
         mutex.lock();
+        if (worker_state == ABORT) {
+            return;
+        }
         if (worker_state != ADVANCE_CONTINUOUS) {
             condition.wait(&mutex);
         }
