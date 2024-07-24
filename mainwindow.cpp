@@ -50,6 +50,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->playButton, &QAbstractButton::clicked, this, &MainWindow::play_button_handler);
     connect(ui->playAllButton, &QAbstractButton::clicked, this, &MainWindow::play_all_button_handler);
     connect(ui->pauseButton, &QAbstractButton::clicked, this, &MainWindow::pause_button_handler);
+    connect(ui->actionPause, &QAction::triggered, this, &MainWindow::pause_button_handler);
     connect(ui->resetButton, &QAbstractButton::clicked, this, &MainWindow::reset_button_handler);
 
     // Load the monospaced font and make stdout box use it

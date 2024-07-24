@@ -40,6 +40,8 @@ private:
     void play_all_button_handler();
     void pause_button_handler();
 
+    void lock_parameters();
+    void unlock_parameters();
 
     void update_tool_buttons();
 
