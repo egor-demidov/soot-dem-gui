@@ -155,7 +155,7 @@
             <string>Advance simulation continuously</string>
            </property>
            <property name="statusTip">
-            <string>Advance SImulation Continuously</string>
+            <string>Advance Simulation Continuously</string>
            </property>
            <property name="text">
             <string/>
@@ -249,6 +249,16 @@
            </property>
           </spacer>
          </item>
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Simulation type:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="simulationTypeSelector"/>
+         </item>
         </layout>
        </widget>
       </item>
@@ -288,6 +298,12 @@
            <enum>Qt::Orientation::Vertical</enum>
           </property>
           <widget class="QTableWidget" name="parameterTable">
+           <property name="toolTip">
+            <string/>
+           </property>
+           <property name="statusTip">
+            <string>Edit simulation parameters</string>
+           </property>
            <property name="rowCount">
             <number>0</number>
            </property>
@@ -304,7 +320,7 @@
           </widget>
           <widget class="QPlainTextEdit" name="stdoutBox">
            <property name="toolTip">
-            <string>DEM engine standard output</string>
+            <string/>
            </property>
            <property name="statusTip">
             <string>DEM engine standard output</string>
@@ -337,6 +353,9 @@
            <font>
             <family>Monospace</family>
            </font>
+          </property>
+          <property name="statusTip">
+           <string>Latest dump preview</string>
           </property>
          </widget>
         </widget>

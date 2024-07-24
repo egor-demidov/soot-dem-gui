@@ -45,6 +45,13 @@ private:
 
     void update_tool_buttons();
 
+    template<typename SimulationType>
+    void initialize_simulation();
+
+    template<typename SimulationType>
+    void initialize_parameter_table();
+    void reset_parameter_table();
+
     void initialize_preview(std::vector<Eigen::Vector3d> const & x, double r_part);
     void update_preview(std::vector<Eigen::Vector3d> const & x, double r_part);
     void reset_preview();

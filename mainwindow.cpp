@@ -39,7 +39,6 @@ constexpr const char * parameter_type_to_string(ParameterType type) {
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(std::make_unique<Ui::MainWindow>())
-    , parameter_table_fields(RestructuringFixedFractionSimulation::N_PARAMETERS * 4)
 {
     ui->setupUi(this);
 
@@ -59,36 +58,16 @@ MainWindow::MainWindow(QWidget *parent)
     QFont mono_font(mono_font_family);
     ui->stdoutBox->setFont(mono_font);
 
+    // Initialize the simulation type selector
+    ui->simulationTypeSelector->addItem("Restructuring - fixed neck fraction", 0);
+    ui->simulationTypeSelector->addItem("Aggregation", 1);
+
     // Initialize the parameter table
     QStringList horizontal_header;
     horizontal_header << "Parameter" << "Type" << "Value" << "Description";
     ui->parameterTable->setHorizontalHeaderLabels(horizontal_header);
 
-    ui->parameterTable->setRowCount(RestructuringFixedFractionSimulation::N_PARAMETERS);
-
-    for (size_t i = 0; i < RestructuringFixedFractionSimulation::N_PARAMETERS; i ++) {
-        auto [id, type, description] = RestructuringFixedFractionSimulation::PARAMETERS[i];
-
-        parameter_table_fields[i*4].setText(id);
-        parameter_table_fields[i*4].setFlags(Qt::NoItemFlags | Qt::ItemIsEnabled);
-        parameter_table_fields[i*4+1].setText(parameter_type_to_string(type));
-        parameter_table_fields[i*4+1].setFlags(Qt::NoItemFlags | Qt::ItemIsEnabled);
-
-        // TODO: remove after debugging
-        parameter_table_fields[i*4+2].setText(RestructuringFixedFractionSimulation::default_values[i]);
-
-        parameter_table_fields[i*4+3].setText(description);
-        parameter_table_fields[i*4+3].setFlags(Qt::NoItemFlags | Qt::ItemIsEnabled);
-
-        ui->parameterTable->setItem(i, 0, &parameter_table_fields[i*4]);
-        ui->parameterTable->setItem(i, 1, &parameter_table_fields[i*4+1]);
-        ui->parameterTable->setItem(i, 2, &parameter_table_fields[i*4+2]);
-        ui->parameterTable->setItem(i, 3, &parameter_table_fields[i*4+3]);
-    }
-
-    ui->parameterTable->resizeColumnToContents(0);
-    ui->parameterTable->resizeColumnToContents(1);
-    ui->parameterTable->resizeColumnToContents(3);
+    initialize_parameter_table<RestructuringFixedFractionSimulation>();
 
     QPointer<QVTKOpenGLNativeWidget> vtkRenderWidget =
             new QVTKOpenGLNativeWidget(ui->previewWidget);
@@ -114,36 +93,78 @@ MainWindow::MainWindow(QWidget *parent)
     vtk_sphere_source->SetThetaResolution(15);
 }
 
+template <typename SimulationType>
+void MainWindow::initialize_parameter_table() {
+    parameter_table_fields.resize(SimulationType::N_PARAMETERS * 4);
+
+    ui->parameterTable->setRowCount(SimulationType::N_PARAMETERS);
+
+    for (size_t i = 0; i < SimulationType::N_PARAMETERS; i ++) {
+        auto [id, type, description] = SimulationType::PARAMETERS[i];
+
+        parameter_table_fields[i*4].setText(id);
+        parameter_table_fields[i*4].setFlags(Qt::NoItemFlags | Qt::ItemIsEnabled);
+        parameter_table_fields[i*4+1].setText(parameter_type_to_string(type));
+        parameter_table_fields[i*4+1].setFlags(Qt::NoItemFlags | Qt::ItemIsEnabled);
+
+        // TODO: remove after debugging
+        parameter_table_fields[i*4+2].setText(SimulationType::default_values[i]);
+
+        parameter_table_fields[i*4+3].setText(description);
+        parameter_table_fields[i*4+3].setFlags(Qt::NoItemFlags | Qt::ItemIsEnabled);
+
+        ui->parameterTable->setItem(i, 0, &parameter_table_fields[i*4]);
+        ui->parameterTable->setItem(i, 1, &parameter_table_fields[i*4+1]);
+        ui->parameterTable->setItem(i, 2, &parameter_table_fields[i*4+2]);
+        ui->parameterTable->setItem(i, 3, &parameter_table_fields[i*4+3]);
+    }
+
+    ui->parameterTable->resizeColumnToContents(0);
+    ui->parameterTable->resizeColumnToContents(1);
+    ui->parameterTable->resizeColumnToContents(3);
+}
+
+void MainWindow::reset_parameter_table() {
+    ui->parameterTable->clear();
+    parameter_table_fields.clear();
+}
+
+template<typename SimulationType>
+void MainWindow::initialize_simulation() {
+    lock_parameters();
+    parameter_heap_t parameter_heap;
+    for (int i = 0; i < RestructuringFixedFractionSimulation::N_PARAMETERS; i ++) {
+        QString value = parameter_table_fields[i*4+2].text();
+        auto [id, type, description] = RestructuringFixedFractionSimulation::PARAMETERS[i];
+        switch (type) {
+            case INTEGER:
+                parameter_heap[id] = std::make_pair(INTEGER, ParameterValue{.integer_value = value.toInt()});
+                break;
+            case REAL:
+                parameter_heap[id] = std::make_pair(REAL, ParameterValue{.real_value = value.toDouble()});
+                break;
+            case STRING:
+                parameter_heap[id] = std::make_pair(STRING, ParameterValue{.string_value = value.toStdString()});
+                break;
+            case PATH:
+                parameter_heap[id] = std::make_pair(PATH, ParameterValue{.path_value = std::filesystem::path(value.toStdString())});
+        }
+    }
+
+    std::stringstream ss;
+    std::vector<Eigen::Vector3d> x0_buffer;
+    simulation = std::make_shared<SimulationType>(ss, x0_buffer, parameter_heap);
+    ui->stdoutBox->appendPlainText(QString::fromStdString(ss.str()));
+
+    compute_thread.initialize(simulation);
+
+    // TODO: replace constant r_part with parameter
+    initialize_preview(x0_buffer, 14e-9);
+}
+
 void MainWindow::play_button_handler() {
     if (simulation_state == RESET) {
-        parameter_heap_t parameter_heap;
-        for (int i = 0; i < RestructuringFixedFractionSimulation::N_PARAMETERS; i ++) {
-            QString value = parameter_table_fields[i*4+2].text();
-            auto [id, type, description] = RestructuringFixedFractionSimulation::PARAMETERS[i];
-            switch (type) {
-                case INTEGER:
-                    parameter_heap[id] = std::make_pair(INTEGER, ParameterValue{.integer_value = value.toInt()});
-                    break;
-                case REAL:
-                    parameter_heap[id] = std::make_pair(REAL, ParameterValue{.real_value = value.toDouble()});
-                    break;
-                case STRING:
-                    parameter_heap[id] = std::make_pair(STRING, ParameterValue{.string_value = value.toStdString()});
-                    break;
-                case PATH:
-                    parameter_heap[id] = std::make_pair(PATH, ParameterValue{.path_value = std::filesystem::path(value.toStdString())});
-            }
-        }
-
-        std::stringstream ss;
-        std::vector<Eigen::Vector3d> x0_buffer;
-        simulation = std::make_shared<RestructuringFixedFractionSimulation>(ss, x0_buffer, parameter_heap);
-        ui->stdoutBox->appendPlainText(QString::fromStdString(ss.str()));
-
-        compute_thread.initialize(simulation);
-
-        // TODO: replace constant r_part with parameter
-        initialize_preview(x0_buffer, 14e-9);
+        initialize_simulation<RestructuringFixedFractionSimulation>();
     }
     simulation_state = RUN_ONE;
     update_tool_buttons();
@@ -152,33 +173,7 @@ void MainWindow::play_button_handler() {
 
 void MainWindow::play_all_button_handler() {
     if (simulation_state == RESET) {
-        parameter_heap_t parameter_heap;
-        for (int i = 0; i < RestructuringFixedFractionSimulation::N_PARAMETERS; i ++) {
-            QString value = parameter_table_fields[i*4+2].text();
-            auto [id, type, description] = RestructuringFixedFractionSimulation::PARAMETERS[i];
-            switch (type) {
-                case INTEGER:
-                    parameter_heap[id] = std::make_pair(INTEGER, ParameterValue{.integer_value = value.toInt()});
-                    break;
-                case REAL:
-                    parameter_heap[id] = std::make_pair(REAL, ParameterValue{.real_value = value.toDouble()});
-                    break;
-                case STRING:
-                    parameter_heap[id] = std::make_pair(STRING, ParameterValue{.string_value = value.toStdString()});
-                    break;
-                case PATH:
-                    parameter_heap[id] = std::make_pair(PATH, ParameterValue{.path_value = std::filesystem::path(value.toStdString())});
-            }
-        }
-
-        std::stringstream ss;
-        std::vector<Eigen::Vector3d> x0_buffer;
-        simulation = std::make_shared<RestructuringFixedFractionSimulation>(ss, x0_buffer, parameter_heap);
-        ui->stdoutBox->appendPlainText(QString::fromStdString(ss.str()));
-
-        compute_thread.initialize(simulation);
-
-        initialize_preview(x0_buffer, 14e-9);
+        initialize_simulation<RestructuringFixedFractionSimulation>();
     }
     simulation_state = RUN_CONTINUOUS;
     update_tool_buttons();
@@ -196,7 +191,20 @@ void MainWindow::reset_button_handler() {
     update_tool_buttons();
     compute_thread.do_terminate();
     reset_preview();
+    unlock_parameters();
     ui->stdoutBox->clear();
+}
+
+void MainWindow::lock_parameters() {
+    for (size_t i = 0; i < RestructuringFixedFractionSimulation::N_PARAMETERS; i ++) {
+        parameter_table_fields[i*4+2].setFlags(Qt::NoItemFlags | Qt::ItemIsEnabled);
+    }
+}
+
+void MainWindow::unlock_parameters() {
+    for (size_t i = 0; i < RestructuringFixedFractionSimulation::N_PARAMETERS; i ++) {
+        parameter_table_fields[i*4+2].setFlags(Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+    }
 }
 
 MainWindow::~MainWindow() = default;
