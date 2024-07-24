@@ -71,7 +71,7 @@ set(CMAKE_NINJA_FORCE_RESPONSE_FILE "ON" CACHE BOOL "Force Ninja to use response
 if (${MSVC})
     set(CMAKE_CXX_FLAGS "/O2 /openmp /EHsc /GL /fp:excep")
 else ()
-    set(CMAKE_CXX_FLAGS "-O3 -flto=auto ${CMAKE_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS "-O3 -flto=auto -fopenmp ${CMAKE_CXX_FLAGS}")
 endif ()
 
 set(MISC_SOURCES
