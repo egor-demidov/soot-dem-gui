@@ -34,6 +34,7 @@ public:
 private:
     void compute_step_done(QString const & message,
                            QVector<Eigen::Vector3d> const & x);
+    void pause_done();
 
     void reset_button_handler();
     void play_button_handler();
@@ -57,7 +58,7 @@ private:
     void reset_preview();
 
     enum SimulationState {
-        RESET, RUN_ONE, RUN_CONTINUOUS, PAUSE
+        RESET, RUN_ONE, RUN_CONTINUOUS, PAUSE_REQUESTED, PAUSE
     };
 
     std::shared_ptr<Simulation> simulation;

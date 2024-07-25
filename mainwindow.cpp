@@ -46,6 +46,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Set up button actions
     connect(&compute_thread, &ComputeThread::step_done, this, &MainWindow::compute_step_done);
+    connect(&compute_thread, &ComputeThread::pause_done, this, &MainWindow::pause_done);
     connect(ui->playButton, &QAbstractButton::clicked, this, &MainWindow::play_button_handler);
     connect(ui->playAllButton, &QAbstractButton::clicked, this, &MainWindow::play_all_button_handler);
     connect(ui->pauseButton, &QAbstractButton::clicked, this, &MainWindow::pause_button_handler);
@@ -167,8 +168,8 @@ void MainWindow::play_button_handler() {
         initialize_simulation<RestructuringFixedFractionSimulation>();
     }
     simulation_state = RUN_ONE;
-    update_tool_buttons();
     compute_thread.do_step();
+    update_tool_buttons();
 }
 
 void MainWindow::play_all_button_handler() {
@@ -176,23 +177,23 @@ void MainWindow::play_all_button_handler() {
         initialize_simulation<RestructuringFixedFractionSimulation>();
     }
     simulation_state = RUN_CONTINUOUS;
-    update_tool_buttons();
     compute_thread.do_continuous_steps();
+    update_tool_buttons();
 }
 
 void MainWindow::pause_button_handler() {
-    simulation_state = PAUSE;
-    update_tool_buttons();
+    simulation_state = PAUSE_REQUESTED;
     compute_thread.do_pause();
+    update_tool_buttons();
 }
 
 void MainWindow::reset_button_handler() {
     simulation_state = RESET;
-    update_tool_buttons();
     compute_thread.do_terminate();
     reset_preview();
-    unlock_parameters();
     ui->stdoutBox->clear();
+    update_tool_buttons();
+    unlock_parameters();
 }
 
 void MainWindow::lock_parameters() {
@@ -211,7 +212,8 @@ MainWindow::~MainWindow() = default;
 
 void MainWindow::update_tool_buttons() {
     switch (simulation_state) {
-        case RUN_ONE: {
+        case RUN_ONE:
+        case PAUSE_REQUESTED: {
             ui->newButton->setEnabled(false);
             ui->saveButton->setEnabled(false);
             ui->openButton->setEnabled(false);
@@ -264,6 +266,11 @@ void MainWindow::compute_step_done(QString const & message,
         update_tool_buttons();
     }
     update_preview(std::vector<Eigen::Vector3d>(x.begin(), x.end()), 14.0e-9);
+}
+
+void MainWindow::pause_done() {
+    simulation_state = PAUSE;
+    update_tool_buttons();
 }
 
 void MainWindow::initialize_preview(std::vector<Eigen::Vector3d> const & x, double r_part) {
