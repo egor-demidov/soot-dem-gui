@@ -31,27 +31,33 @@ public:
 
 //    void closeEvent(QCloseEvent * event) override;
 
-private:
+    template<typename SimulationType>
+    void initialize_parameter_table();
+    void reset_parameter_table();
+
+    template<typename SimulationType>
+    void initialize_simulation();
+
+    std::unique_ptr<Ui::MainWindow> ui;
+
+private slots:
     void compute_step_done(QString const & message,
                            QVector<Eigen::Vector3d> const & x);
-    void pause_done();
 
+    void pause_done();
     void reset_button_handler();
     void play_button_handler();
     void play_all_button_handler();
     void pause_button_handler();
 
+    void simulation_type_combo_handler();
+
+private:
     void lock_parameters();
+
     void unlock_parameters();
 
     void update_tool_buttons();
-
-    template<typename SimulationType>
-    void initialize_simulation();
-
-    template<typename SimulationType>
-    void initialize_parameter_table();
-    void reset_parameter_table();
 
     void initialize_preview(std::vector<Eigen::Vector3d> const & x, double r_part);
     void update_preview(std::vector<Eigen::Vector3d> const & x, double r_part);
@@ -63,7 +69,6 @@ private:
 
     std::shared_ptr<Simulation> simulation;
     std::vector<QTableWidgetItem> parameter_table_fields;
-    std::unique_ptr<Ui::MainWindow> ui;
     ComputeThread compute_thread;
     SimulationState simulation_state = RESET;
 

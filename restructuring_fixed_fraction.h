@@ -49,6 +49,9 @@ public:
         std::string,
         std::vector<Eigen::Vector3d>> perform_iterations() override;
 
+    static constexpr const char * combo_label = "Restructuring - fixed neck fraction";
+    static constexpr unsigned int combo_id = 0;
+
     // TODO: remove after debugging
     static constexpr const char * default_values[]{
             "1e-19",
@@ -90,6 +93,7 @@ public:
             "mackowski",
             "aggregate.txt",
     };
+
     static constexpr std::tuple<const char *, ParameterType, const char *> PARAMETERS[] {
             {"A", REAL, "Hamaker constant"},
             {"d_crit", REAL, "Critical separation for a contact"},

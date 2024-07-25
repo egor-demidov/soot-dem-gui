@@ -22,6 +22,7 @@
 #include <vtkSphereSource.h>
 
 #include "restructuring_fixed_fraction.h"
+#include "aggregation.h"
 
 constexpr const char * parameter_type_to_string(ParameterType type) {
     switch (type) {
@@ -35,6 +36,61 @@ constexpr const char * parameter_type_to_string(ParameterType type) {
             return "path";
     }
 }
+
+template<typename T>
+struct init_combo_box_functor {
+    static void apply(MainWindow * main_window) {
+        main_window->ui->simulationTypeSelector->addItem(T::combo_label, T::combo_id);
+    }
+};
+
+template<typename T>
+struct changed_combo_box_functor {
+    static void apply(MainWindow * main_window) {
+        if (T::combo_id == main_window->ui->simulationTypeSelector->currentData().toInt()) {
+            main_window->reset_parameter_table();
+            main_window->initialize_parameter_table<T>();
+        }
+    }
+};
+
+template<typename T>
+struct init_simulation_functor {
+    static void apply(MainWindow * main_window) {
+        if (T::combo_id == main_window->ui->simulationTypeSelector->currentData().toInt()) {
+            main_window->initialize_simulation<T>();
+        }
+    }
+};
+
+template<template<typename> typename functor, typename Head>
+void iterate_types(MainWindow * main_window) {
+    functor<Head>::apply(main_window);
+}
+
+template<template<typename> typename functor, typename Head, typename Mid, typename... Tail>
+void iterate_types(MainWindow * main_window) {
+    functor<Head>::apply(main_window);
+    iterate_types<functor, Mid, Tail...>(main_window);
+}
+
+//template<typename Head>
+//std::shared_ptr<Simulation> simulation_factory(int combo_id [[maybe_unused]],
+//                                               std::ostream & output_stream,
+//                                               std::vector<Eigen::Vector3d> & x0_buffer,
+//                                               parameter_heap_t const & parameter_heap) {
+//    return std::make_shared<Head>(output_stream, x0_buffer, parameter_heap);
+//}
+//
+//template<typename Head, typename Mid, typename... Tail>
+//std::shared_ptr<Simulation> simulation_factory(int combo_id,
+//                                               std::ostream & output_stream,
+//                                               std::vector<Eigen::Vector3d> & x0_buffer,
+//                                               parameter_heap_t const & parameter_heap) {
+//    if (combo_id == Head::combo_id)
+//        return std::make_shared<Head>(output_stream, x0_buffer, parameter_heap);
+//    return simulation_factory<Mid, Tail...>(combo_id, output_stream, x0_buffer, parameter_heap);
+//}
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -52,6 +108,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->pauseButton, &QAbstractButton::clicked, this, &MainWindow::pause_button_handler);
     connect(ui->actionPause, &QAction::triggered, this, &MainWindow::pause_button_handler);
     connect(ui->resetButton, &QAbstractButton::clicked, this, &MainWindow::reset_button_handler);
+    connect(ui->simulationTypeSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(simulation_type_combo_handler()));
 
     // Load the monospaced font and make stdout box use it
     auto mono_font_id = QFontDatabase::addApplicationFont(":/fonts/RobotoMono-VariableFont_wght.ttf");
@@ -60,15 +117,16 @@ MainWindow::MainWindow(QWidget *parent)
     ui->stdoutBox->setFont(mono_font);
 
     // Initialize the simulation type selector
-    ui->simulationTypeSelector->addItem("Restructuring - fixed neck fraction", 0);
-    ui->simulationTypeSelector->addItem("Aggregation", 1);
+    iterate_types<init_combo_box_functor,
+        RestructuringFixedFractionSimulation,
+        AggregationSimulation>(this);
 
     // Initialize the parameter table
     QStringList horizontal_header;
     horizontal_header << "Parameter" << "Type" << "Value" << "Description";
     ui->parameterTable->setHorizontalHeaderLabels(horizontal_header);
 
-    initialize_parameter_table<RestructuringFixedFractionSimulation>();
+//    initialize_parameter_table<AggregationSimulation>();
 
     QPointer<QVTKOpenGLNativeWidget> vtkRenderWidget =
             new QVTKOpenGLNativeWidget(ui->previewWidget);
@@ -126,7 +184,6 @@ void MainWindow::initialize_parameter_table() {
 }
 
 void MainWindow::reset_parameter_table() {
-    ui->parameterTable->clear();
     parameter_table_fields.clear();
 }
 
@@ -134,9 +191,9 @@ template<typename SimulationType>
 void MainWindow::initialize_simulation() {
     lock_parameters();
     parameter_heap_t parameter_heap;
-    for (int i = 0; i < RestructuringFixedFractionSimulation::N_PARAMETERS; i ++) {
+    for (int i = 0; i < SimulationType::N_PARAMETERS; i ++) {
         QString value = parameter_table_fields[i*4+2].text();
-        auto [id, type, description] = RestructuringFixedFractionSimulation::PARAMETERS[i];
+        auto [id, type, description] = SimulationType::PARAMETERS[i];
         switch (type) {
             case INTEGER:
                 parameter_heap[id] = std::make_pair(INTEGER, ParameterValue{.integer_value = value.toInt()});
@@ -165,7 +222,7 @@ void MainWindow::initialize_simulation() {
 
 void MainWindow::play_button_handler() {
     if (simulation_state == RESET) {
-        initialize_simulation<RestructuringFixedFractionSimulation>();
+        iterate_types<init_simulation_functor, RestructuringFixedFractionSimulation, AggregationSimulation>(this);
     }
     simulation_state = RUN_ONE;
     compute_thread.do_step();
@@ -174,7 +231,7 @@ void MainWindow::play_button_handler() {
 
 void MainWindow::play_all_button_handler() {
     if (simulation_state == RESET) {
-        initialize_simulation<RestructuringFixedFractionSimulation>();
+        iterate_types<init_simulation_functor, RestructuringFixedFractionSimulation, AggregationSimulation>(this);
     }
     simulation_state = RUN_CONTINUOUS;
     compute_thread.do_continuous_steps();
@@ -196,14 +253,20 @@ void MainWindow::reset_button_handler() {
     unlock_parameters();
 }
 
+void MainWindow::simulation_type_combo_handler() {
+    iterate_types<changed_combo_box_functor,
+     RestructuringFixedFractionSimulation,
+     AggregationSimulation>(this);
+}
+
 void MainWindow::lock_parameters() {
-    for (size_t i = 0; i < RestructuringFixedFractionSimulation::N_PARAMETERS; i ++) {
+    for (size_t i = 0; i < parameter_table_fields.size() / 4; i ++) {
         parameter_table_fields[i*4+2].setFlags(Qt::NoItemFlags | Qt::ItemIsEnabled);
     }
 }
 
 void MainWindow::unlock_parameters() {
-    for (size_t i = 0; i < RestructuringFixedFractionSimulation::N_PARAMETERS; i ++) {
+    for (size_t i = 0; i < parameter_table_fields.size() / 4; i ++) {
         parameter_table_fields[i*4+2].setFlags(Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled);
     }
 }
@@ -221,6 +284,7 @@ void MainWindow::update_tool_buttons() {
             ui->playAllButton->setEnabled(false);
             ui->pauseButton->setEnabled(false);
             ui->resetButton->setEnabled(false);
+            ui->simulationTypeSelector->setEnabled(false);
             break;
         }
         case PAUSE: {
@@ -231,6 +295,7 @@ void MainWindow::update_tool_buttons() {
             ui->playAllButton->setEnabled(true);
             ui->pauseButton->setEnabled(false);
             ui->resetButton->setEnabled(true);
+            ui->simulationTypeSelector->setEnabled(false);
             break;
         }
         case RUN_CONTINUOUS: {
@@ -241,6 +306,7 @@ void MainWindow::update_tool_buttons() {
             ui->playAllButton->setEnabled(false);
             ui->pauseButton->setEnabled(true);
             ui->resetButton->setEnabled(false);
+            ui->simulationTypeSelector->setEnabled(false);
             break;
         }
         case RESET: {
@@ -251,6 +317,7 @@ void MainWindow::update_tool_buttons() {
             ui->playAllButton->setEnabled(true);
             ui->pauseButton->setEnabled(false);
             ui->resetButton->setEnabled(false);
+            ui->simulationTypeSelector->setEnabled(true);
         }
     }
 }
