@@ -51,10 +51,14 @@ set(PROJECT_SOURCES
         mainwindow.ui
         compute_thread.h
         compute_thread.cpp
+        aggregation.h
+        aggregation.cpp
         icons/icons.qrc
         fonts/fonts.qrc
         restructuring_fixed_fraction.cpp
         restructuring_fixed_fraction.h
+        simulation.h
+        simulation.cpp
 )
 
 add_compile_definitions(LIBGRAN_USE_OMP)
@@ -82,6 +86,7 @@ set(MISC_SOURCES
     deps/soot-dem/src/random_engine.cpp
     deps/soot-dem/src/reader.cpp
     deps/soot-dem/src/writer.cpp
+        simulation.cpp
 )
 
 add_executable(gui_design_soot_dem

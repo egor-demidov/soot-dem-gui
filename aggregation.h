@@ -2,8 +2,8 @@
 // Created by egor on 7/23/24.
 //
 
-#ifndef GUI_DESIGN_SOOT_DEM_RESTRUCTURING_FIXED_FRACTION_H
-#define GUI_DESIGN_SOOT_DEM_RESTRUCTURING_FIXED_FRACTION_H
+#ifndef GUI_DESIGN_SOOT_DEM_AGGREGATION_H
+#define GUI_DESIGN_SOOT_DEM_AGGREGATION_H
 
 #include <iostream>
 #include <fstream>
@@ -16,6 +16,7 @@
 #include <Eigen/Eigen>
 
 #include <libgran/hamaker_force/hamaker_force.h>
+#include <libgran/contact_force/contact_force.h>
 #include <libgran/granular_system/granular_system_neighbor_list.h>
 
 #include <coating_force.h>
@@ -30,16 +31,25 @@
 
 #include "simulation.h"
 
-class RestructuringFixedFractionSimulation : public Simulation {
+class AggregationSimulation : public Simulation {
 public:
-    using aggregate_model_t = aggregate<Eigen::Vector3d, double>;
-    using coating_model_t = binary_coating_functor<Eigen::Vector3d, double>;
-    using binary_force_container_t = binary_force_functor_container<Eigen::Vector3d, double, aggregate_model_t, coating_model_t>;
+    using contact_force_model_t = contact_force_functor<Eigen::Vector3d, double>;
+    using hamaker_force_model_t = hamaker_functor<Eigen::Vector3d, double>;
+    using binary_force_container_t = binary_force_functor_container<Eigen::Vector3d, double, contact_force_model_t, hamaker_force_model_t>;
     using unary_force_container_t = unary_force_functor_container<Eigen::Vector3d, double>;
     using granular_system_t = granular_system_neighbor_list<Eigen::Vector3d, double, rotational_velocity_verlet_half,
             rotational_step_handler, binary_force_container_t, unary_force_container_t>;
 
-    RestructuringFixedFractionSimulation(
+    class granular_system_neighbor_list_mutable_velocity : public granular_system_t {
+    public:
+        using granular_system_t::granular_system_neighbor_list;
+
+        std::vector<Eigen::Vector3d> & get_v() {
+            return this->v;
+        }
+    };
+
+    AggregationSimulation(
             std::ostream & output_stream,
             std::vector<Eigen::Vector3d> & x0_buffer,
             parameter_heap_t const & parameter_heap
@@ -134,15 +144,15 @@ public:
 
 
 private:
-    double mass, inertia, r_part, dt;
+    double mass, inertia, r_part, dt, box_size;
     long dump_period, neighbor_update_period;
     size_t current_step = 0;
-    std::unique_ptr<coating_model_t> coating_model;
-    std::unique_ptr<aggregate_model_t> aggregate_model;
+    std::unique_ptr<contact_force_model_t> contact_model;
+    std::unique_ptr<hamaker_force_model_t> hamaker_model;
     std::unique_ptr<unary_force_container_t> unary_force_container;
     std::unique_ptr<binary_force_container_t> binary_force_container;
-    std::unique_ptr<granular_system_t> granular_system;
+    std::unique_ptr<granular_system_neighbor_list_mutable_velocity> granular_system;
     rotational_step_handler<std::vector<Eigen::Vector3d>, Eigen::Vector3d> step_handler_instance;
 };
 
-#endif //GUI_DESIGN_SOOT_DEM_RESTRUCTURING_FIXED_FRACTION_H
+#endif //GUI_DESIGN_SOOT_DEM_AGGREGATION_H
