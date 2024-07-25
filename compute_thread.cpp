@@ -71,7 +71,7 @@ void ComputeThread::do_pause() {
         exit(EXIT_FAILURE);
     }
 
-    worker_state = PAUSE;
+    worker_state = PAUSE_REQUEST;
 }
 
 void ComputeThread::do_terminate() {
@@ -109,6 +109,10 @@ void ComputeThread::run() {
             return;
         }
         if (worker_state != ADVANCE_CONTINUOUS) {
+            if (worker_state == PAUSE_REQUEST) {
+                emit pause_done();
+                worker_state = PAUSE;
+            }
             condition.wait(&mutex);
         }
         mutex.unlock();

@@ -33,6 +33,7 @@ public:
 signals:
     void step_done(QString const & message,
                    QVector<Eigen::Vector3d> const & x);
+    void pause_done();
 
 protected:
     void run() override;
@@ -42,7 +43,7 @@ private:
     QWaitCondition condition;
 
     enum {
-        UNINITIALIZED, ADVANCE_ONE, ADVANCE_CONTINUOUS, PAUSE, ABORT
+        UNINITIALIZED, ADVANCE_ONE, ADVANCE_CONTINUOUS,  PAUSE_REQUEST, PAUSE, ABORT
     } worker_state = UNINITIALIZED;
 
     // Parameters received upon "do_step" invocation
