@@ -15,7 +15,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
-#qt_standard_project_setup()
+qt_standard_project_setup()
 
 find_package(VTK COMPONENTS
         CommonCore
@@ -112,28 +112,15 @@ vtk_module_autoinit(
     MODULES ${VTK_LIBRARIES}
 )
 
-if (${WIN32})
-    add_custom_command(TARGET gui_design_soot_dem POST_BUILD
-            COMMAND Qt6::windeployqt
-            ARGS $<TARGET_FILE:gui_design_soot_dem>
-    )
+install(TARGETS gui_design_soot_dem
+        BUNDLE  DESTINATION .
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+qt_generate_deploy_app_script(
+        TARGET gui_design_soot_dem
+        OUTPUT_SCRIPT deploy_script
+        NO_UNSUPPORTED_PLATFORM_ERROR
+)
+install(SCRIPT ${deploy_script})
 
-#    add_custom_command(
-#            TARGET gui_design_soot_dem POST_BUILD
-#            COMMAND ${CMAKE_COMMAND} -E make_directory
-#            ${CMAKE_BINARY_DIR}/dist/
-#            COMMAND ${CMAKE_COMMAND} -E copy
-#            $<TARGET_FILE:gui_design_soot_dem>
-#            ${CMAKE_BINARY_DIR}/dist/
-#    )
-#
-#    add_custom_command(TARGET gui_design_soot_dem POST_BUILD
-#            COMMAND Qt6::windeployqt
-#            ARGS ${CMAKE_BINARY_DIR}/dist/$<TARGET_FILE_NAME:gui_design_soot_dem>
-#    )
-endif ()
-
-#add_custom_command(TARGET gui_design_soot_dem POST_BUILD
-#        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:gui_design_soot_dem> $<TARGET_FILE_DIR:gui_design_soot_dem>
-#        COMMAND_EXPAND_LISTS
-#)
+include(CPack)
