@@ -120,6 +120,7 @@ qt_generate_deploy_app_script(
         TARGET gui_design_soot_dem
         OUTPUT_SCRIPT deploy_script
         NO_UNSUPPORTED_PLATFORM_ERROR
+        DEPLOY_TOOL_OPTIONS "--compiler-runtime"
 )
 install(SCRIPT ${deploy_script})
 

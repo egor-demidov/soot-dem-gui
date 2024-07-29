@@ -12,3 +12,5 @@
 !deps/
 !deps/**
 !*.json
+!.github/
+!.github/**
