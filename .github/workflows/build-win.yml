@@ -32,6 +32,7 @@ jobs:
           cmake --build . --config Release
           dir
           - name: Archive compiled artifact
+      - name: Archive compiled artifact
         uses: actions/upload-artifact@v3
         with:
           name: soot-dem-gui-windows-msvc-x86_64
