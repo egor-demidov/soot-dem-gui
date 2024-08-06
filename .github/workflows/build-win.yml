@@ -27,28 +27,13 @@ jobs:
           $env:VCPKG_ROOT = pwd
           $env:PATH = "$env:VCPKG_ROOT;$env:PATH"
           cd $src_dir
-          cmake -G Ninja --preset=default .
+          cmake -G Ninja -DVCPKG_TARGET_TRIPLET=x64-windows-static -DCMAKE_BUILD_TYPE=Release --preset=default .
           cd build
           cmake --build . --config Release
-
-#          mkdir cmake-build
-#          cd cmake-build
-#          cmake ..
-#          cmake --build . --config Release
-#          move ./Release/aggregate_deposition.exe ../dist/soot-dem/bin/
-#          move ./Release/afm_necking_fraction.exe ../dist/soot-dem/bin/
-#          move ./Release/restructuring.exe ../dist/soot-dem/bin/
-#          cd ..
-#          $compress = @{
-#            Path = "dist/soot-dem/"
-#            CompressionLevel = "Fastest"
-#            DestinationPath = "soot-dem-windows-msvc-x86_64.zip"
-#          }
-#          Compress-Archive @compress
-#          curl -i -T soot-dem-windows-msvc-x86_64.zip https://web.njit.edu/~ed242/deploy_soot_dem_windows_msvc.php?key=${{env.AFS_WINDOWS_MSVC_UPLOAD}}
-#      - name: Archive compiled artifact
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: soot-dem-windows-msvc-x86_64
-#          path: |
-#            dist
+          dir
+          - name: Archive compiled artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: soot-dem-gui-windows-msvc-x86_64
+          path: |
+            .
