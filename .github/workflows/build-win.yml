@@ -18,6 +18,7 @@ jobs:
           submodules: recursive
       - name: Build
         run: |
+          pwd
           cd /
           mkdir src
           cd src
