@@ -1,0 +1,50 @@
+name: Build Windows
+
+run-name: CI pipeline triggered by ${{ github.actor }}
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  Compile-Windows-MSVC:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Build
+        run: |
+          cd /
+          mkdir src
+          cd src
+          git clone https://github.com/microsoft/vcpkg.git
+          cd vcpkg; .\bootstrap-vcpkg.bat
+          $env:VCPKG_ROOT = pwd
+          $env:PATH = "$env:VCPKG_ROOT;$env:PATH"
+          pwd
+
+#          mkdir cmake-build
+#          cd cmake-build
+#          cmake ..
+#          cmake --build . --config Release
+#          move ./Release/aggregate_deposition.exe ../dist/soot-dem/bin/
+#          move ./Release/afm_necking_fraction.exe ../dist/soot-dem/bin/
+#          move ./Release/restructuring.exe ../dist/soot-dem/bin/
+#          cd ..
+#          $compress = @{
+#            Path = "dist/soot-dem/"
+#            CompressionLevel = "Fastest"
+#            DestinationPath = "soot-dem-windows-msvc-x86_64.zip"
+#          }
+#          Compress-Archive @compress
+#          curl -i -T soot-dem-windows-msvc-x86_64.zip https://web.njit.edu/~ed242/deploy_soot_dem_windows_msvc.php?key=${{env.AFS_WINDOWS_MSVC_UPLOAD}}
+#      - name: Archive compiled artifact
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: soot-dem-windows-msvc-x86_64
+#          path: |
+#            dist

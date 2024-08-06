@@ -55,6 +55,7 @@ set(PROJECT_SOURCES
         aggregation.cpp
         icons/icons.qrc
         fonts/fonts.qrc
+        icons/app.rc
         restructuring_fixed_fraction.cpp
         restructuring_fixed_fraction.h
         simulation.h
@@ -93,7 +94,10 @@ add_executable(gui_design_soot_dem
     ${PROJECT_SOURCES} ${MISC_SOURCES}
 )
 
-target_link_libraries(gui_design_soot_dem PRIVATE Qt${QT_VERSION_MAJOR}::Widgets ${VTK_LIBRARIES})
+target_link_libraries(gui_design_soot_dem PUBLIC Qt${QT_VERSION_MAJOR}::Widgets ${VTK_LIBRARIES})
+
+set_property(TARGET gui_design_soot_dem PROPERTY
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 set_target_properties(gui_design_soot_dem PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER soot-dem.edemidov.com
@@ -112,16 +116,16 @@ vtk_module_autoinit(
     MODULES ${VTK_LIBRARIES}
 )
 
-install(TARGETS gui_design_soot_dem
-        BUNDLE  DESTINATION .
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
-qt_generate_deploy_app_script(
-        TARGET gui_design_soot_dem
-        OUTPUT_SCRIPT deploy_script
-        NO_UNSUPPORTED_PLATFORM_ERROR
-        DEPLOY_TOOL_OPTIONS "--compiler-runtime"
-)
-install(SCRIPT ${deploy_script})
-
-include(CPack)
+#install(TARGETS gui_design_soot_dem
+#        BUNDLE  DESTINATION .
+#        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+#)
+#qt_generate_deploy_app_script(
+#        TARGET gui_design_soot_dem
+#        OUTPUT_SCRIPT deploy_script
+#        NO_UNSUPPORTED_PLATFORM_ERROR
+#        DEPLOY_TOOL_OPTIONS "--compiler-runtime"
+#)
+#install(SCRIPT ${deploy_script})
+#
+#include(CPack)
