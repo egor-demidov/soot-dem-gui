@@ -7,6 +7,7 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  VCPKG_FEATURE_FLAGS: dependencygraph
 
 on:
   push:
@@ -24,7 +25,6 @@ jobs:
           submodules: recursive
       - name: Set up vcpkg and configure
         run: |
-          $env:VCPKG_FEATURE_FLAGS = dependencygraph
           $src_dir = pwd
           cd /
           mkdir src
