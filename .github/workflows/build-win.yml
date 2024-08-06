@@ -18,7 +18,7 @@ jobs:
           submodules: recursive
       - name: Build
         run: |
-          pwd
+          $src_dir = pwd
           cd /
           mkdir src
           cd src
@@ -26,7 +26,10 @@ jobs:
           cd vcpkg; .\bootstrap-vcpkg.bat
           $env:VCPKG_ROOT = pwd
           $env:PATH = "$env:VCPKG_ROOT;$env:PATH"
-          pwd
+          cd $src_dir
+          cmake -G Ninja --preset=default .
+          cd build
+          cmake --build . --config Release
 
 #          mkdir cmake-build
 #          cd cmake-build
