@@ -23,6 +23,7 @@ qt_standard_project_setup()
 
 find_package(VTK COMPONENTS
         CommonCore
+        CommonColor
         CommonDataModel
         FiltersSources
         GUISupportQt
