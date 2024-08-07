@@ -93,8 +93,11 @@ void ComputeThread::run() {
         mutex.unlock();
 
         if (current_state == ADVANCE_ONE || current_state == ADVANCE_CONTINUOUS) {
-            auto [message, x] = simulation->perform_iterations();
-            emit step_done(QString::fromStdString(message), QVector<Eigen::Vector3d>(x.begin(), x.end()));
+            auto [message, x, neck_positions, neck_orientations] = simulation->perform_iterations();
+            emit step_done(QString::fromStdString(message),
+                           QVector<Eigen::Vector3d>(x.begin(), x.end()),
+                           QVector<Eigen::Vector3d>(neck_positions.begin(), neck_positions.end()),
+                           QVector<Eigen::Vector3d>(neck_orientations.begin(), neck_orientations.end()));
 
             if (current_state == ADVANCE_ONE) {
                 mutex.lock();

@@ -78,7 +78,7 @@ include_directories(deps)
 set(CMAKE_NINJA_FORCE_RESPONSE_FILE "ON" CACHE BOOL "Force Ninja to use response files")
 
 if (${MSVC})
-    set(CMAKE_CXX_FLAGS "/O2 /openmp /EHsc /GL /fp:excep")
+    set(CMAKE_CXX_FLAGS "/O2 /openmp /EHsc /GL")
 else ()
     set(CMAKE_CXX_FLAGS "-O3 -flto=auto -fopenmp ${CMAKE_CXX_FLAGS}")
 endif ()

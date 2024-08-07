@@ -28,6 +28,8 @@ public:
     virtual ~Simulation() = default;
     virtual std::tuple<
     std::string,
+    std::vector<Eigen::Vector3d>,
+    std::vector<Eigen::Vector3d>,
     std::vector<Eigen::Vector3d>> perform_iterations() = 0;
 
     long get_integer_parameter(std::string const & id) const;

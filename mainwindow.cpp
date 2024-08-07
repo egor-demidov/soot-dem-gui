@@ -141,15 +141,21 @@ MainWindow::MainWindow(QWidget *parent)
     layout->addWidget(vtkRenderWidget);
 
     // VTK part
-
+    vtk_named_colors = vtkNew<vtkNamedColors>();
     vtk_render_window = vtkNew<vtkGenericOpenGLRenderWindow>();
     vtkRenderWidget->setRenderWindow(vtk_render_window.Get());
     vtk_renderer = vtkNew<vtkRenderer>();
+    vtk_renderer->SetBackground(vtk_named_colors->GetColor3d("White").GetData());
     vtk_render_window->AddRenderer(vtk_renderer);
     vtk_sphere_source = vtkNew<vtkSphereSource>();
     vtk_sphere_source->SetRadius(1.0);
     vtk_sphere_source->SetPhiResolution(30);
     vtk_sphere_source->SetThetaResolution(15);
+
+    vtk_cylinder_source = vtkNew<vtkCylinderSource>();
+    vtk_cylinder_source->SetRadius(0.75);
+    vtk_cylinder_source->SetHeight(1.5);
+    vtk_cylinder_source->SetResolution(30);
 }
 
 template <typename SimulationType>
@@ -210,14 +216,14 @@ void MainWindow::initialize_simulation() {
     }
 
     std::stringstream ss;
-    std::vector<Eigen::Vector3d> x0_buffer;
-    simulation = std::make_shared<SimulationType>(ss, x0_buffer, parameter_heap);
+    std::vector<Eigen::Vector3d> x0_buffer, neck_positions_buffer, neck_orientations_buffer;
+    simulation = std::make_shared<SimulationType>(ss, x0_buffer, neck_positions_buffer, neck_orientations_buffer, parameter_heap);
     ui->stdoutBox->appendPlainText(QString::fromStdString(ss.str()));
 
     compute_thread.initialize(simulation);
 
     // TODO: replace constant r_part with parameter
-    initialize_preview(x0_buffer, 14e-9);
+    initialize_preview(x0_buffer, neck_positions_buffer, neck_orientations_buffer, 14e-9);
 }
 
 void MainWindow::play_button_handler() {
@@ -324,7 +330,9 @@ void MainWindow::update_tool_buttons() {
 
 
 void MainWindow::compute_step_done(QString const & message,
-                       QVector<Eigen::Vector3d> const & x) {
+                                   QVector<Eigen::Vector3d> const & x,
+                                   QVector<Eigen::Vector3d> const & neck_positions,
+                                   QVector<Eigen::Vector3d> const & neck_orientations) {
 
     ui->stdoutBox->appendPlainText(message);
 
@@ -332,7 +340,11 @@ void MainWindow::compute_step_done(QString const & message,
         simulation_state = SimulationState::PAUSE;
         update_tool_buttons();
     }
-    update_preview(std::vector<Eigen::Vector3d>(x.begin(), x.end()), 14.0e-9);
+    // TODO: replace hardcoded r_part with value from inputs
+    update_preview(std::vector<Eigen::Vector3d>(x.begin(), x.end()),
+                   std::vector<Eigen::Vector3d>(neck_positions.begin(), neck_positions.end()),
+                   std::vector<Eigen::Vector3d>(neck_orientations.begin(), neck_orientations.end()),
+                   14.0e-9);
 }
 
 void MainWindow::pause_done() {
@@ -340,8 +352,14 @@ void MainWindow::pause_done() {
     update_tool_buttons();
 }
 
-void MainWindow::initialize_preview(std::vector<Eigen::Vector3d> const & x, double r_part) {
-    vtk_particles_representation.reserve(0);
+void MainWindow::initialize_preview(
+        std::vector<Eigen::Vector3d> const & x,
+        std::vector<Eigen::Vector3d> const & neck_positions,
+        std::vector<Eigen::Vector3d> const & neck_orientations,
+        double r_part) {
+
+    // Initialize particle representations
+    vtk_particles_representation.reserve(x.size());
     for (size_t i = 0; i < x.size(); i ++) {
         auto mapper = vtkNew<vtkPolyDataMapper>();
         mapper->SetInputConnection(vtk_sphere_source->GetOutputPort());
@@ -350,23 +368,74 @@ void MainWindow::initialize_preview(std::vector<Eigen::Vector3d> const & x, doub
         actor->SetMapper(mapper);
 
         actor->SetPosition(x[i][0] / r_part, x[i][1] / r_part, x[i][2] / r_part);
+        actor->GetProperty()->SetColor(vtk_named_colors->GetColor3d("DimGray").GetData());
+        actor->GetProperty()->SetSpecular(0.3);
 
         vtk_renderer->AddActor(actor);
         vtk_particles_representation.emplace_back(mapper, actor);
     }
     vtk_renderer->ResetCamera();
     vtk_render_window->Render();
+
+    // Initialize neck representations
+    vtk_necks_representation.reserve(neck_positions.size());
+    for (size_t i = 0; i < neck_positions.size(); i ++) {
+        auto mapper = vtkNew<vtkPolyDataMapper>();
+        mapper->SetInputConnection(vtk_cylinder_source->GetOutputPort());
+
+        auto actor = vtkNew<vtkActor>();
+        actor->SetMapper(mapper);
+
+        actor->SetPosition(neck_positions[i][0] / r_part, neck_positions[i][1] / r_part, neck_positions[i][2] / r_part);
+
+        // Convert orientation vector to rotation
+        Eigen::Vector3d initial_axis = Eigen::Vector3d::UnitY();
+        Eigen::Vector3d axis = initial_axis.cross(neck_orientations[i]);
+        double angle_deg = 180.0 / M_PI * acos(initial_axis.dot(neck_orientations[i]));  // Orientation vector must be normalized
+
+        actor->RotateWXYZ(angle_deg, axis[0], axis[1], axis[2]);
+        actor->GetProperty()->SetColor(vtk_named_colors->GetColor3d("Orange").GetData());
+
+        vtk_renderer->AddActor(actor);
+        vtk_necks_representation.emplace_back(mapper, actor);
+    }
+    vtk_renderer->ResetCamera();
+    vtk_render_window->Render();
 }
 
-void MainWindow::update_preview(std::vector<Eigen::Vector3d> const & x, double r_part) {
+// ASSUMING NECK COUNT CAN ONLY DECREASE
+void MainWindow::update_preview(std::vector<Eigen::Vector3d> const & x,
+                                std::vector<Eigen::Vector3d> const & neck_positions,
+                                std::vector<Eigen::Vector3d> const & neck_orientations,
+                                double r_part) {
+
+    // Delete necks that have been broken
+//    for (long i = vtk_necks_representation.size() - 1; i > neck_positions.size(); i --) {
+//        vtk_renderer->RemoveActor(std::get<1>(vtk_necks_representation[i]));
+//        vtk_necks_representation.pop_back();
+//    }
+
     for (size_t i = 0; i < x.size(); i ++) {
         vtk_particles_representation[i].second->SetPosition(x[i][0] / r_part, x[i][1] / r_part, x[i][2] / r_part);
+    }
+    for (size_t i = 0; i < neck_positions.size(); i ++) {
+        // Convert orientation vector to rotation
+        Eigen::Vector3d initial_axis = Eigen::Vector3d::UnitY();
+        Eigen::Vector3d axis = initial_axis.cross(neck_orientations[i]);
+        double angle_deg = 180.0 / M_PI * acos(initial_axis.dot(neck_orientations[i]));  // Orientation vector must be normalized
+
+        vtk_necks_representation[i].second->SetOrientation(0.0, 0.0, 0.0);
+        vtk_necks_representation[i].second->RotateWXYZ(angle_deg, axis[0], axis[1], axis[2]);
+        vtk_necks_representation[i].second->SetPosition(neck_positions[i][0] / r_part, neck_positions[i][1] / r_part, neck_positions[i][2] / r_part);
     }
     vtk_render_window->Render();
 }
 
 void MainWindow::reset_preview() {
     for (auto [mapper, actor] : vtk_particles_representation) {
+        vtk_renderer->RemoveActor(actor);
+    }
+    for (auto [mapper, actor] : vtk_necks_representation) {
         vtk_renderer->RemoveActor(actor);
     }
     vtk_particles_representation.clear();

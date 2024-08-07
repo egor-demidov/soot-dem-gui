@@ -50,6 +50,8 @@ void bounce_off_walls(std::vector<Eigen::Vector3d> const & particles,
 AggregationSimulation::AggregationSimulation(
             std::ostream & output_stream,
             std::vector<Eigen::Vector3d> & x0_buffer,
+            std::vector<Eigen::Vector3d> & neck_positions_buffer,
+            std::vector<Eigen::Vector3d> & neck_orientations_buffer,
             parameter_heap_t const & parameter_heap
     )
     : Simulation(parameter_heap) {
@@ -148,7 +150,7 @@ AggregationSimulation::AggregationSimulation(
                                                           step_handler_instance, *binary_force_container, *unary_force_container);
 }
 
-std::tuple<std::string, std::vector<Eigen::Vector3d>> AggregationSimulation::perform_iterations() {
+std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>> AggregationSimulation::perform_iterations() {
     for (int i = 0; i < dump_period; i ++) {
         if (current_step % neighbor_update_period == 0) {
             granular_system->update_neighbor_list();
@@ -161,5 +163,5 @@ std::tuple<std::string, std::vector<Eigen::Vector3d>> AggregationSimulation::per
     std::stringstream message_out;
     message_out << "Dump #" << current_step / dump_period << " \tt: " << double(current_step) * dt;
 
-    return {message_out.str(), granular_system->get_x()};
+    return {message_out.str(), granular_system->get_x(), {}, {}};
 }

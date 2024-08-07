@@ -32,7 +32,9 @@ public:
 
 signals:
     void step_done(QString const & message,
-                   QVector<Eigen::Vector3d> const & x);
+                   QVector<Eigen::Vector3d> const & x,
+                   QVector<Eigen::Vector3d> const & neck_positions_buffer,
+                   QVector<Eigen::Vector3d> const & neck_orientations_buffer);
     void pause_done();
 
 protected:

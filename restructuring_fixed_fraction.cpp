@@ -7,6 +7,8 @@
 RestructuringFixedFractionSimulation::RestructuringFixedFractionSimulation(
             std::ostream & output_stream,
             std::vector<Eigen::Vector3d> & x0_buffer,
+            std::vector<Eigen::Vector3d> & neck_positions_buffer,
+            std::vector<Eigen::Vector3d> & neck_orientations_buffer,
             parameter_heap_t const & parameter_heap
     )
     : Simulation(parameter_heap) {
@@ -130,9 +132,50 @@ RestructuringFixedFractionSimulation::RestructuringFixedFractionSimulation(
     for (size_t i = n_necks; i > target_n_necks; i --) {
         break_random_neck(aggregate_model->get_bonded_contacts(), x0.size());
     }
+
+    auto [neck_positions, neck_orientations] = get_neck_information();
+    neck_positions_buffer = neck_positions;
+    neck_orientations_buffer = neck_orientations;
 }
 
-std::tuple<std::string, std::vector<Eigen::Vector3d>> RestructuringFixedFractionSimulation::perform_iterations() {
+std::tuple<std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>> RestructuringFixedFractionSimulation::get_neck_information() const {
+    auto const & bonded_contacts = aggregate_model->get_bonded_contacts();
+    auto const & x = granular_system->get_x();
+    size_t neck_count = std::count(bonded_contacts.begin(), bonded_contacts.end(), true) / 2u;
+
+    std::vector<Eigen::Vector3d> neck_positions, neck_orientations;
+
+    neck_positions.reserve(neck_count);
+    neck_orientations.reserve(neck_count);
+
+    for (size_t i = 0; i < x.size() - 1; i ++) {
+        for (size_t j = i + 1; j < x.size(); j ++) {
+            if (!bonded_contacts[i * x.size() + j])
+                continue;
+
+            // This is a bonded contact
+            Eigen::Vector3d position = (x[j] + x[i]) / 2.0; // Compute the position
+
+            neck_positions.emplace_back(position[0], position[1], position[2]);
+        }
+    }
+
+    for (size_t i = 0; i < x.size() - 1; i ++) {
+        for (size_t j = i + 1; j < x.size(); j ++) {
+            if (!bonded_contacts[i * x.size() + j])
+                continue;
+
+            // This is a bonded contact
+            Eigen::Vector3d orientation = (x[j] - x[i]).normalized(); // Compute the orientation vector
+
+            neck_orientations.emplace_back(orientation[0], orientation[1], orientation[2]);
+        }
+    }
+
+    return std::make_tuple(neck_positions, neck_orientations);
+}
+
+std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>> RestructuringFixedFractionSimulation::perform_iterations() {
     for (int i = 0; i < dump_period; i ++) {
         if (current_step % neighbor_update_period == 0) {
             granular_system->update_neighbor_list();
@@ -144,5 +187,7 @@ std::tuple<std::string, std::vector<Eigen::Vector3d>> RestructuringFixedFraction
     std::stringstream message_out;
     message_out << "Dump #" << current_step / dump_period << " \tt: " << double(current_step) * dt;
 
-    return {message_out.str(), granular_system->get_x()};
+    auto [neck_positions, neck_orientations] = get_neck_information();
+
+    return {message_out.str(), granular_system->get_x(), neck_positions, neck_orientations};
 }

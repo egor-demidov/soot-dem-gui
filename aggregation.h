@@ -52,11 +52,15 @@ public:
     AggregationSimulation(
             std::ostream & output_stream,
             std::vector<Eigen::Vector3d> & x0_buffer,
+            std::vector<Eigen::Vector3d> & neck_positions_buffer,
+            std::vector<Eigen::Vector3d> & neck_orientations_buffer,
             parameter_heap_t const & parameter_heap
     );
 
     std::tuple<
         std::string,
+        std::vector<Eigen::Vector3d>,
+        std::vector<Eigen::Vector3d>,
         std::vector<Eigen::Vector3d>> perform_iterations() override;
 
     static constexpr const char * combo_label = "Aggregation";

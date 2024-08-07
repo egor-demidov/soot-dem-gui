@@ -10,10 +10,12 @@
 
 #include <vtkSmartPointer.h>
 #include <vtkSphereSource.h>
+#include <vtkCylinderSource.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkRenderer.h>
 #include <vtkActor.h>
 #include <vtkGenericOpenGLRenderWindow.h>
+#include <vtkNamedColors.h>
 
 #include "compute_thread.h"
 
@@ -42,7 +44,9 @@ public:
 
 private slots:
     void compute_step_done(QString const & message,
-                           QVector<Eigen::Vector3d> const & x);
+                           QVector<Eigen::Vector3d> const & x,
+                           QVector<Eigen::Vector3d> const & neck_positions,
+                           QVector<Eigen::Vector3d> const & neck_orientations);
 
     void pause_done();
     void reset_button_handler();
@@ -59,8 +63,15 @@ private:
 
     void update_tool_buttons();
 
-    void initialize_preview(std::vector<Eigen::Vector3d> const & x, double r_part);
-    void update_preview(std::vector<Eigen::Vector3d> const & x, double r_part);
+    void initialize_preview(
+            std::vector<Eigen::Vector3d> const & x,
+            std::vector<Eigen::Vector3d> const & neck_positions,
+            std::vector<Eigen::Vector3d> const & neck_orientations,
+            double r_part);
+    void update_preview(std::vector<Eigen::Vector3d> const & x,
+                        std::vector<Eigen::Vector3d> const & neck_positions,
+                        std::vector<Eigen::Vector3d> const & neck_orientations,
+                        double r_part);
     void reset_preview();
 
     enum SimulationState {
@@ -73,13 +84,19 @@ private:
     SimulationState simulation_state = RESET;
 
     // VTK stuff
+    vtkSmartPointer<vtkNamedColors> vtk_named_colors;  // Available colors: https://htmlpreview.github.io/?https://github.com/Kitware/vtk-examples/blob/gh-pages/VTKNamedColorPatches.html
     vtkSmartPointer<vtkGenericOpenGLRenderWindow> vtk_render_window;
     vtkSmartPointer<vtkRenderer> vtk_renderer;
     vtkSmartPointer<vtkSphereSource> vtk_sphere_source;
+    vtkSmartPointer<vtkCylinderSource> vtk_cylinder_source;
     std::vector<std::pair<
         vtkSmartPointer<vtkPolyDataMapper>,
         vtkSmartPointer<vtkActor>
         >> vtk_particles_representation;
+    std::vector<std::pair<
+            vtkSmartPointer<vtkPolyDataMapper>,
+            vtkSmartPointer<vtkActor>
+         >> vtk_necks_representation;
 };
 
 #endif // MAINWINDOW_H

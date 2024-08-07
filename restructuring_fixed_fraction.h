@@ -42,11 +42,15 @@ public:
     RestructuringFixedFractionSimulation(
             std::ostream & output_stream,
             std::vector<Eigen::Vector3d> & x0_buffer,
+            std::vector<Eigen::Vector3d> & neck_positions_buffer,
+            std::vector<Eigen::Vector3d> & neck_orientations_buffer,
             parameter_heap_t const & parameter_heap
     );
 
     std::tuple<
         std::string,
+        std::vector<Eigen::Vector3d>,
+        std::vector<Eigen::Vector3d>,
         std::vector<Eigen::Vector3d>> perform_iterations() override;
 
     static constexpr const char * combo_label = "Restructuring - fixed neck fraction";
@@ -60,7 +64,7 @@ public:
             "5.6e-08",
             "1.78571e+08",
             "1e-9",
-            "0.0",
+            "0.7",
             "5e-09",
             "1.25e-06",
             "2.5e-10",
@@ -135,6 +139,8 @@ public:
             {"aggregate_path", PATH, ""}
     };
     static constexpr size_t N_PARAMETERS = sizeof(PARAMETERS) / sizeof(PARAMETERS[0]);
+
+    std::tuple<std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>> get_neck_information() const;
 
 
 private:
