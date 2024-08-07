@@ -41,6 +41,7 @@ jobs:
           $env:PATH = "$env:VCPKG_ROOT;$env:PATH"
           cd $src_dir
           cmake -G Ninja -DVCPKG_INSTALL_OPTIONS="--x-buildtrees-root=C:/bld;--x-packages-root=C:/pkg" -DVCPKG_TARGET_TRIPLET=x64-windows-static -DVCPKG_BUILD_TYPE=Release -DCMAKE_BUILD_TYPE=Release --preset=default .
+          type C:\bld\qtdeclarative\install-x64-windows-static-rel-out.log
       - name: Build
         run: |
           cd build
