@@ -7,6 +7,7 @@
 
 #include <QMainWindow>
 #include <QTableWidgetItem>
+#include <QSettings>
 
 #include <vtkSmartPointer.h>
 #include <vtkSphereSource.h>
@@ -53,6 +54,11 @@ private slots:
     void play_button_handler();
     void play_all_button_handler();
     void pause_button_handler();
+    void new_button_handler();
+    void open_button_handler();
+    void save_button_handler();
+
+    void parameters_changed();
 
     void simulation_type_combo_handler();
 
@@ -62,6 +68,7 @@ private:
     void unlock_parameters();
 
     void update_tool_buttons();
+    void update_configuration_state();
 
     void initialize_preview(
             std::vector<Eigen::Vector3d> const & x,
@@ -78,10 +85,19 @@ private:
         RESET, RUN_ONE, RUN_CONTINUOUS, PAUSE_REQUESTED, PAUSE
     };
 
+    enum ConfigurationFileState {
+        UNSAVED, PATH_CHOSEN, SAVED
+    };
+
+    bool watching_parameter_table = false;
+
     std::shared_ptr<Simulation> simulation;
     std::vector<QTableWidgetItem> parameter_table_fields;
     ComputeThread compute_thread;
     SimulationState simulation_state = RESET;
+    ConfigurationFileState configuration_state = UNSAVED;
+    QString configurations_file_path;
+//    QSettings settings;
 
     // VTK stuff
     vtkSmartPointer<vtkNamedColors> vtk_named_colors;  // Available colors: https://htmlpreview.github.io/?https://github.com/Kitware/vtk-examples/blob/gh-pages/VTKNamedColorPatches.html

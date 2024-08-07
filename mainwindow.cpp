@@ -4,6 +4,7 @@
 #include <thread>
 
 #include <QPointer>
+#include <QFileDialog>
 
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
@@ -108,7 +109,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->pauseButton, &QAbstractButton::clicked, this, &MainWindow::pause_button_handler);
     connect(ui->actionPause, &QAction::triggered, this, &MainWindow::pause_button_handler);
     connect(ui->resetButton, &QAbstractButton::clicked, this, &MainWindow::reset_button_handler);
+    connect(ui->saveButton, &QAbstractButton::clicked, this, &MainWindow::save_button_handler);
     connect(ui->simulationTypeSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(simulation_type_combo_handler()));
+    connect(ui->parameterTable, &QTableWidget::itemChanged, this, &MainWindow::parameters_changed);
 
     // Load the monospaced font and make stdout box use it
     auto mono_font_id = QFontDatabase::addApplicationFont(":/fonts/RobotoMono-VariableFont_wght.ttf");
@@ -160,6 +163,9 @@ MainWindow::MainWindow(QWidget *parent)
 
 template <typename SimulationType>
 void MainWindow::initialize_parameter_table() {
+
+    watching_parameter_table = false;
+
     parameter_table_fields.resize(SimulationType::N_PARAMETERS * 4);
 
     ui->parameterTable->setRowCount(SimulationType::N_PARAMETERS);
@@ -187,10 +193,15 @@ void MainWindow::initialize_parameter_table() {
     ui->parameterTable->resizeColumnToContents(0);
     ui->parameterTable->resizeColumnToContents(1);
     ui->parameterTable->resizeColumnToContents(3);
+
+    watching_parameter_table = true;
+    parameters_changed();
 }
 
 void MainWindow::reset_parameter_table() {
+    watching_parameter_table = false;
     parameter_table_fields.clear();
+    watching_parameter_table = true;
 }
 
 template<typename SimulationType>
@@ -224,6 +235,32 @@ void MainWindow::initialize_simulation() {
 
     // TODO: replace constant r_part with parameter
     initialize_preview(x0_buffer, neck_positions_buffer, neck_orientations_buffer, 14e-9);
+}
+
+void MainWindow::parameters_changed() {
+    if (watching_parameter_table) {
+        if (configuration_state == SAVED)
+            configuration_state = PATH_CHOSEN;
+        update_configuration_state();
+    }
+}
+
+void MainWindow::new_button_handler() {
+    // TODO: prompt if UNSAVED / PATH_CHOSEN; then load defaults for the selected model
+}
+
+void MainWindow::open_button_handler() {
+    // TODO: prompt if UNSAVED / PATH_CHOSEN; validate parameter file type; load parameters
+}
+
+void MainWindow::save_button_handler() {
+    configurations_file_path = QFileDialog::getSaveFileName(this,
+                     "Save Configuration As", "/", "XML Files (*.xml)");
+
+    // TODO: write parameter file
+
+    configuration_state = SAVED;
+    update_configuration_state();
 }
 
 void MainWindow::play_button_handler() {
@@ -266,18 +303,41 @@ void MainWindow::simulation_type_combo_handler() {
 }
 
 void MainWindow::lock_parameters() {
+    watching_parameter_table = false;
     for (size_t i = 0; i < parameter_table_fields.size() / 4; i ++) {
         parameter_table_fields[i*4+2].setFlags(Qt::NoItemFlags | Qt::ItemIsEnabled);
     }
+    watching_parameter_table = true;
 }
 
 void MainWindow::unlock_parameters() {
+    watching_parameter_table = false;
     for (size_t i = 0; i < parameter_table_fields.size() / 4; i ++) {
         parameter_table_fields[i*4+2].setFlags(Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled);
     }
+    watching_parameter_table = true;
 }
 
 MainWindow::~MainWindow() = default;
+
+void MainWindow::update_configuration_state() {
+    switch (configuration_state) {
+        case UNSAVED: {
+            ui->saveButton->setEnabled(true);
+            setWindowTitle("soot-dem-gui by Egor Demidov - project location not chosen");
+            break;
+        }
+        case PATH_CHOSEN: {
+            ui->saveButton->setEnabled(true);
+            setWindowTitle("soot-dem-gui by Egor Demidov - " + configurations_file_path + " - changes not saved");
+            break;
+        }
+        case SAVED: {
+            ui->saveButton->setEnabled(false);
+            setWindowTitle("soot-dem-gui by Egor Demidov - " + configurations_file_path);
+        }
+    }
+}
 
 void MainWindow::update_tool_buttons() {
     switch (simulation_state) {
@@ -302,6 +362,7 @@ void MainWindow::update_tool_buttons() {
             ui->pauseButton->setEnabled(false);
             ui->resetButton->setEnabled(true);
             ui->simulationTypeSelector->setEnabled(false);
+            update_configuration_state();
             break;
         }
         case RUN_CONTINUOUS: {
@@ -324,6 +385,7 @@ void MainWindow::update_tool_buttons() {
             ui->pauseButton->setEnabled(false);
             ui->resetButton->setEnabled(false);
             ui->simulationTypeSelector->setEnabled(true);
+            update_configuration_state();
         }
     }
 }
