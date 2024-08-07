@@ -40,7 +40,7 @@ jobs:
           $env:VCPKG_ROOT = pwd
           $env:PATH = "$env:VCPKG_ROOT;$env:PATH"
           cd $src_dir
-          cmake -G Ninja -DVCPKG_TARGET_TRIPLET=x64-windows-static -DVCPKG_BUILD_TYPE=Release -DCMAKE_BUILD_TYPE=Release --preset=default .
+          cmake -G Ninja -DVCPKG_INSTALL_OPTIONS="--x-buildtrees-root=C:/bld" -DVCPKG_TARGET_TRIPLET=x64-windows-static -DVCPKG_BUILD_TYPE=Release -DCMAKE_BUILD_TYPE=Release --preset=default .
       - name: Build
         run: |
           cd build
