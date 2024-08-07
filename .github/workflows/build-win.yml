@@ -27,8 +27,6 @@ jobs:
         run: |
           $src_dir = pwd
           cd /
-          mkdir src
-          cd src
           git clone https://github.com/microsoft/vcpkg.git
           cd vcpkg; .\bootstrap-vcpkg.bat
           $env:VCPKG_ROOT = pwd

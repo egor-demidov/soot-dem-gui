@@ -8,6 +8,10 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
+set(CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "V8NHL8MF4D")
+set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Egor Demidov")
+set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_STYLE "Manual")
+
 cmake_policy(SET CMP0060 NEW)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -90,20 +94,31 @@ set(MISC_SOURCES
         simulation.cpp
 )
 
-add_executable(gui_design_soot_dem
+if (${APPLE})
+    set(MACOS_APP_ICON ${CMAKE_SOURCE_DIR}/icons/app-mac.icns)
+    set_source_files_properties(${MACOS_APP_ICON} PROPERTIES
+            MACOSX_PACKAGE_LOCATION "Resources")
+endif ()
+
+add_executable(gui_design_soot_dem MACOSX_BUNDLE ${MACOS_APP_ICON}
     ${PROJECT_SOURCES} ${MISC_SOURCES}
 )
 
 target_link_libraries(gui_design_soot_dem PUBLIC Qt${QT_VERSION_MAJOR}::Widgets ${VTK_LIBRARIES})
 
-set_property(TARGET gui_design_soot_dem PROPERTY
-        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+if (${MSVC})
+    set_property(TARGET gui_design_soot_dem PROPERTY
+            MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif ()
 
 set_target_properties(gui_design_soot_dem PROPERTIES
-    MACOSX_BUNDLE_GUI_IDENTIFIER soot-dem.edemidov.com
+    MACOSX_BUNDLE_BUNDLE_NAME "soot-dem-gui by Egor Demidov"
+    MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2024 Egor Demidov"
+    MACOSX_BUNDLE_GUI_IDENTIFIER soot-dem-gui.edemidov.com
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-    MACOSX_BUNDLE TRUE
+    MACOSX_BUNDLE_ICON_FILE app-mac.icns
+    MACOSX_BUNDLE_INFO_STRING "GUI for soot-dem project (https://github.com/egor-demidov/gui-design-soot-dem)"
     WIN32_EXECUTABLE TRUE
 )
 
@@ -116,6 +131,14 @@ vtk_module_autoinit(
     MODULES ${VTK_LIBRARIES}
 )
 
+if (${APPLE})
+    set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR})
+    install(CODE [[
+      include(BundleUtilities)
+      fixup_bundle("${CMAKE_INSTALL_PREFIX}/gui_design_soot_dem.app" "" "")
+    ]] COMPONENT Runtime)
+endif ()
+
 #install(TARGETS gui_design_soot_dem
 #        BUNDLE  DESTINATION .
 #        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -125,6 +148,7 @@ vtk_module_autoinit(
 #        OUTPUT_SCRIPT deploy_script
 #        NO_UNSUPPORTED_PLATFORM_ERROR
 #        DEPLOY_TOOL_OPTIONS "--compiler-runtime"
+#        DEPLOY_TOOL_OPTIONS -sign-for-notarization=7YX2UYW73T
 #)
 #install(SCRIPT ${deploy_script})
 #
