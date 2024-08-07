@@ -133,23 +133,26 @@ vtk_module_autoinit(
 
 if (${APPLE})
     set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR})
+
     install(CODE [[
       include(BundleUtilities)
       fixup_bundle("${CMAKE_INSTALL_PREFIX}/gui_design_soot_dem.app" "" "")
     ]] COMPONENT Runtime)
+
+    install(TARGETS gui_design_soot_dem
+            BUNDLE  DESTINATION .
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    )
+
+    qt_generate_deploy_app_script(
+            TARGET gui_design_soot_dem
+            OUTPUT_SCRIPT deploy_script
+            NO_UNSUPPORTED_PLATFORM_ERROR
+    )
+
+    install(SCRIPT ${deploy_script})
 endif ()
 
-#install(TARGETS gui_design_soot_dem
-#        BUNDLE  DESTINATION .
-#        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-#)
-#qt_generate_deploy_app_script(
-#        TARGET gui_design_soot_dem
-#        OUTPUT_SCRIPT deploy_script
-#        NO_UNSUPPORTED_PLATFORM_ERROR
-#        DEPLOY_TOOL_OPTIONS "--compiler-runtime"
-#        DEPLOY_TOOL_OPTIONS -sign-for-notarization=7YX2UYW73T
-#)
-#install(SCRIPT ${deploy_script})
+
 #
 #include(CPack)
