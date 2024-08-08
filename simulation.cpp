@@ -6,19 +6,6 @@
 
 #include "simulation.h"
 
-constexpr const char * parameter_type_to_string(ParameterType type) {
-    switch (type) {
-        case INTEGER:
-            return "integer";
-        case REAL:
-            return "real";
-        case STRING:
-            return "string";
-        case PATH:
-            return "path";
-    }
-}
-
 ParameterType parameter_type_from_string(const char * string) {
     if (strcmp(string, "integer") == 0) {
         return INTEGER;

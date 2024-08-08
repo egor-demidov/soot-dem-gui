@@ -13,7 +13,18 @@
 
 enum ParameterType {INTEGER, REAL, STRING, PATH};
 
-extern constexpr const char * parameter_type_to_string(ParameterType type);
+constexpr const char * parameter_type_to_string(ParameterType type) {
+    switch (type) {
+        case INTEGER:
+            return "integer";
+        case REAL:
+            return "real";
+        case STRING:
+            return "string";
+        case PATH:
+            return "path";
+    }
+}
 
 extern ParameterType parameter_type_from_string(const char * string);
 
