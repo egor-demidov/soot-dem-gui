@@ -134,8 +134,16 @@ MainWindow::MainWindow(QWidget *parent)
     QPointer<QVTKOpenGLNativeWidget> vtkRenderWidget =
             new QVTKOpenGLNativeWidget(ui->previewWidget);
 
-    vtkRenderWidget->setAttribute(Qt::WA_AcceptTouchEvents, false);
-    vtkRenderWidget->setAttribute(Qt::WA_NoMousePropagation, true);
+//    vtkRenderWidget->setAttribute(Qt::WA_AcceptTouchEvents, false);
+    vtkRenderWidget->setAttribute(Qt::WA_MouseTracking, false);
+//    vtkRenderWidget->setAttribute(Qt::WA_TabletTracking, false);
+//    vtkRenderWidget->ungrabGesture(Qt::GestureType::PanGesture);
+//    vtkRenderWidget->ungrabGesture(Qt::GestureType::TapAndHoldGesture);
+//    vtkRenderWidget->ungrabGesture(Qt::GestureType::TapGesture);
+//    vtkRenderWidget->ungrabGesture(Qt::GestureType::SwipeGesture);
+//    vtkRenderWidget->grabGesture(Qt::GestureType::PinchGesture);
+    // This disables interaction completely - last resort
+//    vtkRenderWidget->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
     QPointer<QVBoxLayout> layout = new QVBoxLayout();
 

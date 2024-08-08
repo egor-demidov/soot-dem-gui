@@ -8,9 +8,10 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "V8NHL8MF4D")
-set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Egor Demidov")
-set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_STYLE "Manual")
+if (${APPLE})
+    set(CMAKE_C_COMPILER "/opt/homebrew/opt/llvm/bin/clang")
+    set(CMAKE_CXX_COMPILER "/opt/homebrew/opt/llvm/bin/clang++")
+endif ()
 
 cmake_policy(SET CMP0060 NEW)
 
@@ -83,6 +84,8 @@ if (${MSVC})
 else ()
     set(CMAKE_CXX_FLAGS "-O3 -flto=auto -fopenmp ${CMAKE_CXX_FLAGS}")
 endif ()
+
+#include_directories(dummy)
 
 set(MISC_SOURCES
     deps/tinyxml2/tinyxml2.cpp

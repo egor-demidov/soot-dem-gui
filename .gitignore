@@ -4,6 +4,8 @@
 !*.cpp
 !*.h
 !*.ui
+!*.cmake
+!*.sh
 !icons/
 !icons/**
 !fonts/
