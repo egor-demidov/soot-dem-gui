@@ -60,6 +60,7 @@ private slots:
     void new_button_handler();
     void open_button_handler();
     void save_button_handler();
+    void save_as_button_handler();
 
     void parameters_changed();
 
@@ -89,7 +90,7 @@ private:
     };
 
     enum ConfigurationFileState {
-        UNSAVED, PATH_CHOSEN, SAVED
+        NONE, UNSAVED, PATH_CHOSEN, SAVED
     };
 
     bool watching_parameter_table = false;
@@ -98,7 +99,7 @@ private:
     std::vector<QTableWidgetItem> parameter_table_fields;
     ComputeThread compute_thread;
     SimulationState simulation_state = RESET;
-    ConfigurationFileState configuration_state = UNSAVED;
+    ConfigurationFileState configuration_state = NONE;
     QString configurations_file_path;
 //    QSettings settings;
 

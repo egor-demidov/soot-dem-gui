@@ -5,6 +5,8 @@
 
 #include <QPointer>
 #include <QFileDialog>
+#include <QMessageBox>
+#include <QErrorMessage>
 
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
@@ -118,17 +120,41 @@ MainWindow::MainWindow(QWidget *parent)
 
     update_tool_buttons();
 
-    // Set up button actions
+    /* Set up compute thread signal handlers */
+
     connect(&compute_thread, &ComputeThread::step_done, this, &MainWindow::compute_step_done);
     connect(&compute_thread, &ComputeThread::pause_done, this, &MainWindow::pause_done);
+
+    /* Set up button actions */
+
+    // Play button
     connect(ui->playButton, &QAbstractButton::clicked, this, &MainWindow::play_button_handler);
+    connect(ui->actionAdvance_One_Step, &QAction::triggered, this, &MainWindow::play_button_handler);
+    // Play all button
     connect(ui->playAllButton, &QAbstractButton::clicked, this, &MainWindow::play_all_button_handler);
+    connect(ui->actionAdvance_Continuously, &QAction::triggered, this, &MainWindow::play_all_button_handler);
+    // Pause button
     connect(ui->pauseButton, &QAbstractButton::clicked, this, &MainWindow::pause_button_handler);
     connect(ui->actionPause, &QAction::triggered, this, &MainWindow::pause_button_handler);
+    // Reset button
     connect(ui->resetButton, &QAbstractButton::clicked, this, &MainWindow::reset_button_handler);
+    connect(ui->actionStop, &QAction::triggered, this, &MainWindow::reset_button_handler);
+    // Save button
     connect(ui->saveButton, &QAbstractButton::clicked, this, &MainWindow::save_button_handler);
+    connect(ui->actionSave, &QAction::triggered, this, &MainWindow::save_button_handler);
+    // New button
+    connect(ui->newButton, &QAbstractButton::clicked, this, &MainWindow::new_button_handler);
+    connect(ui->actionNew, &QAction::triggered, this, &MainWindow::new_button_handler);
+    // Open button
+    connect(ui->openButton, &QAbstractButton::clicked, this, &MainWindow::open_button_handler);
+    connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::open_button_handler);
+    // Save as button
+    connect(ui->actionSaveAs, &QAction::triggered, this, &MainWindow::save_as_button_handler);
+
     connect(ui->simulationTypeSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(simulation_type_combo_handler()));
     connect(ui->parameterTable, &QTableWidget::itemChanged, this, &MainWindow::parameters_changed);
+
+    // TODO: connect itemChanged to input validator
 
     // Load the monospaced font and make stdout box use it
     auto mono_font_id = QFontDatabase::addApplicationFont(":/fonts/RobotoMono-VariableFont_wght.ttf");
@@ -218,7 +244,8 @@ void MainWindow::initialize_parameter_table() {
     ui->parameterTable->resizeColumnToContents(3);
 
     watching_parameter_table = true;
-    parameters_changed();
+    configuration_state = NONE;
+    update_configuration_state();
 }
 
 void MainWindow::reset_parameter_table() {
@@ -268,28 +295,79 @@ void MainWindow::initialize_simulation() {
 
 void MainWindow::parameters_changed() {
     if (watching_parameter_table) {
+        if (configuration_state == NONE)
+            configuration_state = UNSAVED;
         if (configuration_state == SAVED)
             configuration_state = PATH_CHOSEN;
         update_configuration_state();
     }
 }
 
+void MainWindow::save_as_button_handler() {
+    configurations_file_path = QFileDialog::getSaveFileName(this,
+                                "Save configuration as", "/", "XML Files (*.xml)");
+
+    // Check if user canceled
+    if (configurations_file_path.isEmpty())
+        return;
+
+    configuration_state = PATH_CHOSEN;
+
+    save_button_handler();
+}
+
 void MainWindow::new_button_handler() {
-    // TODO: prompt if UNSAVED / PATH_CHOSEN; then load defaults for the selected model
+    if (configuration_state == UNSAVED || configuration_state == PATH_CHOSEN) {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "Unsaved changes", "There are unsaved changes. "
+                                                               "Would you like to save the current configuration starting a blank simulation?",
+                                      QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+
+        if (reply == QMessageBox::Cancel)
+            return;
+        if (reply == QMessageBox::Yes)
+            save_as_button_handler();
+    }
+
+    iterate_types<changed_combo_box_functor, ENABLED_SIMULATIONS>(this);
 }
 
 void MainWindow::open_button_handler() {
-    // TODO: prompt if UNSAVED / PATH_CHOSEN; validate parameter file type; load parameters
+    if (configuration_state == UNSAVED || configuration_state == PATH_CHOSEN) {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "Unsaved changes", "There are unsaved changes. "
+                                        "Would you like to save the current configuration before loading from file?",
+                                      QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+
+        if (reply == QMessageBox::Cancel)
+            return;
+        if (reply == QMessageBox::Yes)
+            save_as_button_handler();
+    }
+
+    QString new_configurations_file_path = QFileDialog::getOpenFileName(this,
+                                                            "Open configuration", "/", "XML Files (*.xml)");
+
+    // Check if user canceled
+    if (new_configurations_file_path.isEmpty())
+        return;
+
+    // TODO: attempt to load simulation type and parameters from file, if successful - set configurations_file_path=new_configurations_file_path, set config state to SAVED
 }
 
 void MainWindow::save_button_handler() {
-    configurations_file_path = QFileDialog::getSaveFileName(this,
-                     "Save Configuration As", "/", "XML Files (*.xml)");
+    if (configuration_state == UNSAVED)
+        save_as_button_handler();
 
-    // TODO: write parameter file
     parameter_heap_t parameters = get_parameters_from_input_current_simulation_type<ENABLED_SIMULATIONS>(this);
     const char * config_signature = get_current_simulation_type_config_signature<ENABLED_SIMULATIONS>(this);
-    write_config_file("", config_signature, parameters);
+
+    try {
+        write_config_file(configurations_file_path.toStdString(), config_signature, parameters);
+    } catch (std::exception const & e) {
+        QMessageBox::warning(this, "File save error", "Unable to save config file to `" + configurations_file_path + "`");
+        return;
+    }
 
 
     configuration_state = SAVED;
@@ -330,7 +408,7 @@ void MainWindow::reset_button_handler() {
 }
 
 void MainWindow::simulation_type_combo_handler() {
-    iterate_types<changed_combo_box_functor, ENABLED_SIMULATIONS>(this);
+    new_button_handler();
 }
 
 void MainWindow::lock_parameters() {
@@ -353,18 +431,47 @@ MainWindow::~MainWindow() = default;
 
 void MainWindow::update_configuration_state() {
     switch (configuration_state) {
+        case NONE: {
+            ui->saveButton->setEnabled(false);
+            ui->newButton->setEnabled(false);
+
+            ui->actionSave->setEnabled(false);
+            ui->actionSaveAs->setEnabled(false);
+            ui->actionNew->setEnabled(false);
+
+            setWindowTitle("soot-dem-gui by Egor Demidov");
+            break;
+        }
         case UNSAVED: {
             ui->saveButton->setEnabled(true);
+            ui->newButton->setEnabled(true);
+
+            ui->actionSave->setEnabled(true);
+            ui->actionSaveAs->setEnabled(true);
+            ui->actionNew->setEnabled(true);
+
             setWindowTitle("soot-dem-gui by Egor Demidov - project location not chosen");
             break;
         }
         case PATH_CHOSEN: {
             ui->saveButton->setEnabled(true);
+            ui->newButton->setEnabled(true);
+
+            ui->actionSave->setEnabled(true);
+            ui->actionSaveAs->setEnabled(true);
+            ui->actionNew->setEnabled(true);
+
             setWindowTitle("soot-dem-gui by Egor Demidov - " + configurations_file_path + " - changes not saved");
             break;
         }
         case SAVED: {
             ui->saveButton->setEnabled(false);
+            ui->newButton->setEnabled(true);
+
+            ui->actionSave->setEnabled(false);
+            ui->actionSaveAs->setEnabled(true);
+            ui->actionNew->setEnabled(true);
+
             setWindowTitle("soot-dem-gui by Egor Demidov - " + configurations_file_path);
         }
     }
@@ -382,6 +489,15 @@ void MainWindow::update_tool_buttons() {
             ui->pauseButton->setEnabled(false);
             ui->resetButton->setEnabled(false);
             ui->simulationTypeSelector->setEnabled(false);
+
+            ui->actionNew->setEnabled(false);
+            ui->actionSave->setEnabled(false);
+            ui->actionSaveAs->setEnabled(false);
+            ui->actionOpen->setEnabled(false);
+            ui->actionAdvance_One_Step->setEnabled(false);
+            ui->actionAdvance_Continuously->setEnabled(false);
+            ui->actionPause->setEnabled(false);
+            ui->actionStop->setEnabled(false);
             break;
         }
         case PAUSE: {
@@ -393,6 +509,15 @@ void MainWindow::update_tool_buttons() {
             ui->pauseButton->setEnabled(false);
             ui->resetButton->setEnabled(true);
             ui->simulationTypeSelector->setEnabled(false);
+
+            ui->actionNew->setEnabled(true);
+            ui->actionSave->setEnabled(true);
+            ui->actionSaveAs->setEnabled(true);
+            ui->actionOpen->setEnabled(true);
+            ui->actionAdvance_One_Step->setEnabled(true);
+            ui->actionAdvance_Continuously->setEnabled(true);
+            ui->actionPause->setEnabled(false);
+            ui->actionStop->setEnabled(true);
             update_configuration_state();
             break;
         }
@@ -405,6 +530,15 @@ void MainWindow::update_tool_buttons() {
             ui->pauseButton->setEnabled(true);
             ui->resetButton->setEnabled(false);
             ui->simulationTypeSelector->setEnabled(false);
+
+            ui->actionNew->setEnabled(false);
+            ui->actionSave->setEnabled(false);
+            ui->actionSaveAs->setEnabled(false);
+            ui->actionOpen->setEnabled(false);
+            ui->actionAdvance_One_Step->setEnabled(false);
+            ui->actionAdvance_Continuously->setEnabled(false);
+            ui->actionPause->setEnabled(true);
+            ui->actionStop->setEnabled(false);
             break;
         }
         case RESET: {
@@ -416,6 +550,15 @@ void MainWindow::update_tool_buttons() {
             ui->pauseButton->setEnabled(false);
             ui->resetButton->setEnabled(false);
             ui->simulationTypeSelector->setEnabled(true);
+
+            ui->actionNew->setEnabled(true);
+            ui->actionSave->setEnabled(true);
+            ui->actionSaveAs->setEnabled(true);
+            ui->actionOpen->setEnabled(true);
+            ui->actionAdvance_One_Step->setEnabled(true);
+            ui->actionAdvance_Continuously->setEnabled(true);
+            ui->actionPause->setEnabled(false);
+            ui->actionStop->setEnabled(false);
             update_configuration_state();
         }
     }

@@ -371,7 +371,7 @@
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>36</height>
+     <height>26</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
@@ -383,7 +383,7 @@
     </property>
     <addaction name="actionNew"/>
     <addaction name="actionSave"/>
-    <addaction name="actionSave_2"/>
+    <addaction name="actionSaveAs"/>
     <addaction name="actionOpen"/>
    </widget>
    <widget class="QMenu" name="menuSimulation">
@@ -393,6 +393,7 @@
     <addaction name="actionAdvance_One_Step"/>
     <addaction name="actionAdvance_Continuously"/>
     <addaction name="actionPause"/>
+    <addaction name="actionStop"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSimulation"/>
@@ -403,7 +404,7 @@
     <string>&amp;Save</string>
    </property>
   </action>
-  <action name="actionSave_2">
+  <action name="actionSaveAs">
    <property name="text">
     <string>Sa&amp;ve As</string>
    </property>
@@ -431,6 +432,11 @@
   <action name="actionNew">
    <property name="text">
     <string>&amp;New</string>
+   </property>
+  </action>
+  <action name="actionStop">
+   <property name="text">
+    <string>Stop</string>
    </property>
   </action>
  </widget>

@@ -28,5 +28,9 @@ void write_config_file(std::filesystem::path const & config_path,
         child_element->SetText(parameter_value_to_string(parameter_type, parameter_value).c_str());
     }
 
-    doc.SaveFile(config_path.string().c_str());
+    tinyxml2::XMLError err = doc.SaveFile(config_path.string().c_str());
+
+    if (err != tinyxml2::XML_SUCCESS) {
+        throw std::exception("Unable to write config file");
+    }
 }
