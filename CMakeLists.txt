@@ -118,7 +118,7 @@ endif ()
 set_target_properties(gui_design_soot_dem PROPERTIES
     MACOSX_BUNDLE_BUNDLE_NAME "soot-dem-gui by Egor Demidov"
     MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2024 Egor Demidov"
-    MACOSX_BUNDLE_GUI_IDENTIFIER soot-dem-gui.edemidov.com
+    MACOSX_BUNDLE_GUI_IDENTIFIER com.edemidov.soot-dem-gui
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE_ICON_FILE app-mac.icns
