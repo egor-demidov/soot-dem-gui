@@ -66,6 +66,8 @@ set(PROJECT_SOURCES
         restructuring_fixed_fraction.h
         simulation.h
         simulation.cpp
+        config.h
+        config.cpp
 )
 
 add_compile_definitions(LIBGRAN_USE_OMP)

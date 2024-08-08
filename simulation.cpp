@@ -6,6 +6,47 @@
 
 #include "simulation.h"
 
+constexpr const char * parameter_type_to_string(ParameterType type) {
+    switch (type) {
+        case INTEGER:
+            return "integer";
+        case REAL:
+            return "real";
+        case STRING:
+            return "string";
+        case PATH:
+            return "path";
+    }
+}
+
+ParameterType parameter_type_from_string(const char * string) {
+    if (strcmp(string, "integer") == 0) {
+        return INTEGER;
+    } else if (strcmp(string, "real") == 0) {
+        return REAL;
+    } else if (strcmp(string, "string") == 0) {
+        return STRING;
+    } else if (strcmp(string, "path") == 0) {
+        return PATH;
+    }
+}
+
+std::string parameter_value_to_string(ParameterType type, ParameterValue const & value) {
+    std::stringstream ss;
+    switch (type) {
+        case INTEGER:
+            ss << value.integer_value;
+            return ss.str();
+        case REAL:
+            ss << value.real_value;
+            return ss.str();
+        case STRING:
+            return value.string_value;
+        case PATH:
+            return value.path_value.string();
+    }
+}
+
 Simulation::Simulation(parameter_heap_t const & parameter_heap) : parameters{parameter_heap} {}
 
 long Simulation::get_integer_parameter(std::string const & id) const {

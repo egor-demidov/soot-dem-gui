@@ -25,18 +25,9 @@
 #include "restructuring_fixed_fraction.h"
 #include "aggregation.h"
 
-constexpr const char * parameter_type_to_string(ParameterType type) {
-    switch (type) {
-        case INTEGER:
-            return "integer";
-        case REAL:
-            return "real";
-        case STRING:
-            return "string";
-        case PATH:
-            return "path";
-    }
-}
+#include "config.h"
+
+#define ENABLED_SIMULATIONS RestructuringFixedFractionSimulation, AggregationSimulation
 
 template<typename T>
 struct init_combo_box_functor {
@@ -75,6 +66,30 @@ void iterate_types(MainWindow * main_window) {
     iterate_types<functor, Mid, Tail...>(main_window);
 }
 
+template<typename Head>
+parameter_heap_t get_parameters_from_input_current_simulation_type(MainWindow * main_window) {
+    return main_window->get_parameters_from_input<Head>();
+}
+
+template<typename Head, typename Mid, typename... Tail>
+parameter_heap_t get_parameters_from_input_current_simulation_type(MainWindow * main_window) {
+    if (main_window->ui->simulationTypeSelector->currentData().toInt() == Head::combo_id)
+        return main_window->get_parameters_from_input<Head>();
+    return get_parameters_from_input_current_simulation_type<Mid, Tail...>(main_window);
+}
+
+template<typename Head>
+const char * get_current_simulation_type_config_signature(MainWindow * main_window) {
+    return Head::config_file_signature;
+}
+
+template<typename Head, typename Mid, typename... Tail>
+const char * get_current_simulation_type_config_signature(MainWindow * main_window) {
+    if (main_window->ui->simulationTypeSelector->currentData().toInt() == Head::combo_id)
+        return Head::config_file_signature;
+    return get_current_simulation_type_config_signature<Mid, Tail...>(main_window);
+}
+
 //template<typename Head>
 //std::shared_ptr<Simulation> simulation_factory(int combo_id [[maybe_unused]],
 //                                               std::ostream & output_stream,
@@ -92,6 +107,8 @@ void iterate_types(MainWindow * main_window) {
 //        return std::make_shared<Head>(output_stream, x0_buffer, parameter_heap);
 //    return simulation_factory<Mid, Tail...>(combo_id, output_stream, x0_buffer, parameter_heap);
 //}
+
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -120,9 +137,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->stdoutBox->setFont(mono_font);
 
     // Initialize the simulation type selector
-    iterate_types<init_combo_box_functor,
-        RestructuringFixedFractionSimulation,
-        AggregationSimulation>(this);
+    iterate_types<init_combo_box_functor, ENABLED_SIMULATIONS>(this);
 
     // Initialize the parameter table
     QStringList horizontal_header;
@@ -213,8 +228,7 @@ void MainWindow::reset_parameter_table() {
 }
 
 template<typename SimulationType>
-void MainWindow::initialize_simulation() {
-    lock_parameters();
+parameter_heap_t MainWindow::get_parameters_from_input() const {
     parameter_heap_t parameter_heap;
     for (int i = 0; i < SimulationType::N_PARAMETERS; i ++) {
         QString value = parameter_table_fields[i*4+2].text();
@@ -233,6 +247,13 @@ void MainWindow::initialize_simulation() {
                 parameter_heap[id] = std::make_pair(PATH, ParameterValue{.path_value = std::filesystem::path(value.toStdString())});
         }
     }
+    return parameter_heap;
+}
+
+template<typename SimulationType>
+void MainWindow::initialize_simulation() {
+    lock_parameters();
+    parameter_heap_t parameter_heap = get_parameters_from_input<SimulationType>();
 
     std::stringstream ss;
     std::vector<Eigen::Vector3d> x0_buffer, neck_positions_buffer, neck_orientations_buffer;
@@ -266,6 +287,10 @@ void MainWindow::save_button_handler() {
                      "Save Configuration As", "/", "XML Files (*.xml)");
 
     // TODO: write parameter file
+    parameter_heap_t parameters = get_parameters_from_input_current_simulation_type<ENABLED_SIMULATIONS>(this);
+    const char * config_signature = get_current_simulation_type_config_signature<ENABLED_SIMULATIONS>(this);
+    write_config_file("", config_signature, parameters);
+
 
     configuration_state = SAVED;
     update_configuration_state();
@@ -273,7 +298,7 @@ void MainWindow::save_button_handler() {
 
 void MainWindow::play_button_handler() {
     if (simulation_state == RESET) {
-        iterate_types<init_simulation_functor, RestructuringFixedFractionSimulation, AggregationSimulation>(this);
+        iterate_types<init_simulation_functor, ENABLED_SIMULATIONS>(this);
     }
     simulation_state = RUN_ONE;
     compute_thread.do_step();
@@ -282,7 +307,7 @@ void MainWindow::play_button_handler() {
 
 void MainWindow::play_all_button_handler() {
     if (simulation_state == RESET) {
-        iterate_types<init_simulation_functor, RestructuringFixedFractionSimulation, AggregationSimulation>(this);
+        iterate_types<init_simulation_functor, ENABLED_SIMULATIONS>(this);
     }
     simulation_state = RUN_CONTINUOUS;
     compute_thread.do_continuous_steps();
@@ -305,9 +330,7 @@ void MainWindow::reset_button_handler() {
 }
 
 void MainWindow::simulation_type_combo_handler() {
-    iterate_types<changed_combo_box_functor,
-     RestructuringFixedFractionSimulation,
-     AggregationSimulation>(this);
+    iterate_types<changed_combo_box_functor, ENABLED_SIMULATIONS>(this);
 }
 
 void MainWindow::lock_parameters() {
@@ -508,6 +531,7 @@ void MainWindow::reset_preview() {
     for (auto [mapper, actor] : vtk_necks_representation) {
         vtk_renderer->RemoveActor(actor);
     }
+    vtk_necks_representation.clear();
     vtk_particles_representation.clear();
     vtk_render_window->Render();
 }

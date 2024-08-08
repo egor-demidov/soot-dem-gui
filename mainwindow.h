@@ -41,6 +41,9 @@ public:
     template<typename SimulationType>
     void initialize_simulation();
 
+    template<typename SimulationType>
+    parameter_heap_t get_parameters_from_input() const;
+
     std::unique_ptr<Ui::MainWindow> ui;
 
 private slots:

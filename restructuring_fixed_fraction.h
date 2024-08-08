@@ -53,6 +53,7 @@ public:
         std::vector<Eigen::Vector3d>,
         std::vector<Eigen::Vector3d>> perform_iterations() override;
 
+    static constexpr const char * config_file_signature = "gui_restructuring";
     static constexpr const char * combo_label = "Restructuring - fixed neck fraction";
     static constexpr unsigned int combo_id = 0;
 

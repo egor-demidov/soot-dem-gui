@@ -13,12 +13,18 @@
 
 enum ParameterType {INTEGER, REAL, STRING, PATH};
 
+extern constexpr const char * parameter_type_to_string(ParameterType type);
+
+extern ParameterType parameter_type_from_string(const char * string);
+
 struct ParameterValue {
     long integer_value;
     double real_value;
     std::string string_value;
     std::filesystem::path path_value;
 };
+
+extern std::string parameter_value_to_string(ParameterType type, ParameterValue const & value);
 
 using parameter_heap_t = std::map<std::string, std::pair<ParameterType, ParameterValue>>;
 
