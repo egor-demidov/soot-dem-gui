@@ -1,0 +1,53 @@
+{
+  "logFormatVersion": 1,
+  "jobId": "c8e30ff7-456c-4216-bf00-82870c2ff08b",
+  "status": "Invalid",
+  "statusSummary": "Archive contains critical validation errors",
+  "statusCode": 4000,
+  "archiveFilename": "gui_design_soot_dem.zip",
+  "uploadDate": "2024-08-09T07:41:29.472Z",
+  "sha256": "34b5e0ea13ef5a59adf2f72bf1f5b9f8a7513f69b173f05fff6856373fc2f0d0",
+  "ticketContents": null,
+  "issues": [
+    {
+      "severity": "error",
+      "code": null,
+      "path": "gui_design_soot_dem.zip/gui_design_soot_dem.app/Contents/MacOS/gui_design_soot_dem",
+      "message": "The signature of the binary is invalid.",
+      "docUrl": "https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution/resolving_common_notarization_issues#3087735",
+      "architecture": "arm64"
+    },
+    {
+      "severity": "error",
+      "code": null,
+      "path": "gui_design_soot_dem.zip/gui_design_soot_dem.app/Contents/Frameworks/libunwind.1.0.dylib",
+      "message": "The signature of the binary is invalid.",
+      "docUrl": "https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution/resolving_common_notarization_issues#3087735",
+      "architecture": "arm64"
+    },
+    {
+      "severity": "error",
+      "code": null,
+      "path": "gui_design_soot_dem.zip/gui_design_soot_dem.app/Contents/Frameworks/libunwind.1.0.dylib",
+      "message": "The signature does not include a secure timestamp.",
+      "docUrl": "https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution/resolving_common_notarization_issues#3087733",
+      "architecture": "arm64"
+    },
+    {
+      "severity": "error",
+      "code": null,
+      "path": "gui_design_soot_dem.zip/gui_design_soot_dem.app/Contents/Frameworks/libomp.dylib",
+      "message": "The signature of the binary is invalid.",
+      "docUrl": "https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution/resolving_common_notarization_issues#3087735",
+      "architecture": "arm64"
+    },
+    {
+      "severity": "error",
+      "code": null,
+      "path": "gui_design_soot_dem.zip/gui_design_soot_dem.app/Contents/Frameworks/libomp.dylib",
+      "message": "The signature does not include a secure timestamp.",
+      "docUrl": "https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution/resolving_common_notarization_issues#3087733",
+      "architecture": "arm64"
+    }
+  ]
+}

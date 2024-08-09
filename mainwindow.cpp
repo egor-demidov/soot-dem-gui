@@ -6,16 +6,13 @@
 #include <QPointer>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QErrorMessage>
 
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 
 #include <QVTKOpenGLNativeWidget.h>
-#include <QVTKInteractor.h>
 #include <vtkInteractorStyleSwitch.h>
 #include <vtkActor.h>
-#include <vtkDataSetMapper.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkDoubleArray.h>
 #include <vtkGenericOpenGLRenderWindow.h>
@@ -170,21 +167,10 @@ MainWindow::MainWindow(QWidget *parent)
     horizontal_header << "Parameter" << "Type" << "Value" << "Description";
     ui->parameterTable->setHorizontalHeaderLabels(horizontal_header);
 
-//    initialize_parameter_table<AggregationSimulation>();
-
     QPointer<QVTKOpenGLNativeWidget> vtkRenderWidget =
             new QVTKOpenGLNativeWidget(ui->previewWidget);
 
-//    vtkRenderWidget->setAttribute(Qt::WA_AcceptTouchEvents, false);
     vtkRenderWidget->setAttribute(Qt::WA_MouseTracking, false);
-//    vtkRenderWidget->setAttribute(Qt::WA_TabletTracking, false);
-//    vtkRenderWidget->ungrabGesture(Qt::GestureType::PanGesture);
-//    vtkRenderWidget->ungrabGesture(Qt::GestureType::TapAndHoldGesture);
-//    vtkRenderWidget->ungrabGesture(Qt::GestureType::TapGesture);
-//    vtkRenderWidget->ungrabGesture(Qt::GestureType::SwipeGesture);
-//    vtkRenderWidget->grabGesture(Qt::GestureType::PinchGesture);
-    // This disables interaction completely - last resort
-//    vtkRenderWidget->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
     QPointer<QVBoxLayout> layout = new QVBoxLayout();
 
@@ -364,7 +350,7 @@ void MainWindow::save_button_handler() {
 
     try {
         write_config_file(configurations_file_path.toStdString(), config_signature, parameters);
-    } catch (std::exception const & e) {
+    } catch (UiException const & e) {
         QMessageBox::warning(this, "File save error", "Unable to save config file to `" + configurations_file_path + "`");
         return;
     }
@@ -376,6 +362,10 @@ void MainWindow::save_button_handler() {
 
 void MainWindow::play_button_handler() {
     if (simulation_state == RESET) {
+        if (configuration_state != SAVED) {
+            // The config must be saved before simulation starts
+            save_button_handler();
+        }
         iterate_types<init_simulation_functor, ENABLED_SIMULATIONS>(this);
     }
     simulation_state = RUN_ONE;
@@ -385,6 +375,10 @@ void MainWindow::play_button_handler() {
 
 void MainWindow::play_all_button_handler() {
     if (simulation_state == RESET) {
+        if (configuration_state != SAVED) {
+            // The config must be saved before simulation starts
+            save_button_handler();
+        }
         iterate_types<init_simulation_functor, ENABLED_SIMULATIONS>(this);
     }
     simulation_state = RUN_CONTINUOUS;
@@ -432,11 +426,11 @@ MainWindow::~MainWindow() = default;
 void MainWindow::update_configuration_state() {
     switch (configuration_state) {
         case NONE: {
-            ui->saveButton->setEnabled(false);
+            ui->saveButton->setEnabled(true);
             ui->newButton->setEnabled(false);
 
-            ui->actionSave->setEnabled(false);
-            ui->actionSaveAs->setEnabled(false);
+            ui->actionSave->setEnabled(true);
+            ui->actionSaveAs->setEnabled(true);
             ui->actionNew->setEnabled(false);
 
             setWindowTitle("soot-dem-gui by Egor Demidov");
@@ -668,10 +662,10 @@ void MainWindow::update_preview(std::vector<Eigen::Vector3d> const & x,
 }
 
 void MainWindow::reset_preview() {
-    for (auto [mapper, actor] : vtk_particles_representation) {
+    for (auto const & [mapper, actor] : vtk_particles_representation) {
         vtk_renderer->RemoveActor(actor);
     }
-    for (auto [mapper, actor] : vtk_necks_representation) {
+    for (auto const & [mapper, actor] : vtk_necks_representation) {
         vtk_renderer->RemoveActor(actor);
     }
     vtk_necks_representation.clear();

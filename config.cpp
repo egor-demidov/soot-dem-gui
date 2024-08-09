@@ -31,6 +31,6 @@ void write_config_file(std::filesystem::path const & config_path,
     tinyxml2::XMLError err = doc.SaveFile(config_path.string().c_str());
 
     if (err != tinyxml2::XML_SUCCESS) {
-        throw std::exception("Unable to write config file");
+        throw UiException("Unable to write config file");
     }
 }

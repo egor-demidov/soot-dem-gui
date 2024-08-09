@@ -68,6 +68,7 @@ set(PROJECT_SOURCES
         simulation.cpp
         config.h
         config.cpp
+        exceptions.h
 )
 
 add_compile_definitions(LIBGRAN_USE_OMP)

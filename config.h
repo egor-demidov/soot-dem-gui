@@ -9,7 +9,9 @@
 #include <string>
 #include <tuple>
 
+#include "exceptions.h"
 #include "simulation.h"
+
 
 std::tuple<std::string, parameter_heap_t> load_config_file(std::filesystem::path const & config_path);
 
