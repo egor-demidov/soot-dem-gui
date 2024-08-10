@@ -46,6 +46,16 @@ struct changed_combo_box_functor {
 };
 
 template<typename T>
+struct init_parameter_table_from_data_functor {
+    static void apply(MainWindow * main_window, parameter_heap_t const & parameters) {
+        if (T::combo_id == main_window->ui->simulationTypeSelector->currentData().toInt()) {
+            main_window->reset_parameter_table();
+            main_window->initialize_parameter_table_with_data<T>(parameters);
+        }
+    }
+};
+
+template<typename T>
 struct init_simulation_functor {
     static void apply(MainWindow * main_window) {
         if (T::combo_id == main_window->ui->simulationTypeSelector->currentData().toInt()) {
@@ -63,6 +73,17 @@ template<template<typename> typename functor, typename Head, typename Mid, typen
 void iterate_types(MainWindow * main_window) {
     functor<Head>::apply(main_window);
     iterate_types<functor, Mid, Tail...>(main_window);
+}
+
+template<template<typename> typename functor, typename Head>
+void iterate_types_w_heap(MainWindow * main_window, parameter_heap_t const & parameters) {
+    functor<Head>::apply(main_window, parameters);
+}
+
+template<template<typename> typename functor, typename Head, typename Mid, typename... Tail>
+void iterate_types_w_heap(MainWindow * main_window, parameter_heap_t const & parameters) {
+    functor<Head>::apply(main_window, parameters);
+    iterate_types_w_heap<functor, Mid, Tail...>(main_window, parameters);
 }
 
 template<typename Head>
@@ -196,6 +217,67 @@ MainWindow::MainWindow(QWidget *parent)
     vtk_cylinder_source->SetResolution(30);
 }
 
+template<typename SimulationType>
+void MainWindow::initialize_parameter_table_with_data(parameter_heap_t const & parameters) {
+
+    watching_parameter_table = false;
+
+    parameter_table_fields.resize(SimulationType::N_PARAMETERS * 4);
+
+    ui->parameterTable->setRowCount(SimulationType::N_PARAMETERS);
+
+    for (size_t i = 0; i < SimulationType::N_PARAMETERS; i ++) {
+        auto [id, type, description] = SimulationType::PARAMETERS[i];
+
+        parameter_table_fields[i*4].setText(id);
+        parameter_table_fields[i*4].setFlags(Qt::NoItemFlags | Qt::ItemIsEnabled);
+        parameter_table_fields[i*4+1].setText(parameter_type_to_string(type));
+        parameter_table_fields[i*4+1].setFlags(Qt::NoItemFlags | Qt::ItemIsEnabled);
+
+        std::stringstream ss;
+        auto [type_heap, value_heap] = parameters.at(id);
+        if (type_heap != type) {
+            throw UiException("Parameter type mismatch");
+        }
+
+        switch (type) {
+            case REAL: {
+                ss << value_heap.real_value;
+                parameter_table_fields[i*4+2].setText(QString::fromStdString(ss.str()));
+                break;
+            }
+            case INTEGER: {
+                ss << value_heap.integer_value;
+                parameter_table_fields[i*4+2].setText(QString::fromStdString(ss.str()));
+                break;
+            }
+            case STRING: {
+                parameter_table_fields[i*4+2].setText(QString::fromStdString(value_heap.string_value));
+                break;
+            }
+            case PATH: {
+                parameter_table_fields[i*4+2].setText(QString::fromStdString(value_heap.path_value.string()));
+            }
+        }
+
+        parameter_table_fields[i*4+3].setText(description);
+        parameter_table_fields[i*4+3].setFlags(Qt::NoItemFlags | Qt::ItemIsEnabled);
+
+        ui->parameterTable->setItem(i, 0, &parameter_table_fields[i*4]);
+        ui->parameterTable->setItem(i, 1, &parameter_table_fields[i*4+1]);
+        ui->parameterTable->setItem(i, 2, &parameter_table_fields[i*4+2]);
+        ui->parameterTable->setItem(i, 3, &parameter_table_fields[i*4+3]);
+    }
+
+    ui->parameterTable->resizeColumnToContents(0);
+    ui->parameterTable->resizeColumnToContents(1);
+    ui->parameterTable->resizeColumnToContents(3);
+
+    watching_parameter_table = true;
+    configuration_state = SAVED;
+    update_configuration_state();
+}
+
 template <typename SimulationType>
 void MainWindow::initialize_parameter_table() {
 
@@ -289,19 +371,6 @@ void MainWindow::parameters_changed() {
     }
 }
 
-void MainWindow::save_as_button_handler() {
-    configurations_file_path = QFileDialog::getSaveFileName(this,
-                                "Save configuration as", "/", "XML Files (*.xml)");
-
-    // Check if user canceled
-    if (configurations_file_path.isEmpty())
-        return;
-
-    configuration_state = PATH_CHOSEN;
-
-    save_button_handler();
-}
-
 void MainWindow::new_button_handler() {
     if (configuration_state == UNSAVED || configuration_state == PATH_CHOSEN) {
         QMessageBox::StandardButton reply;
@@ -339,12 +408,35 @@ void MainWindow::open_button_handler() {
         return;
 
     // TODO: attempt to load simulation type and parameters from file, if successful - set configurations_file_path=new_configurations_file_path, set config state to SAVED
+
+    try {
+        auto [simulation_type, parameter_heap] = load_config_file(new_configurations_file_path.toStdString());
+        unsigned int combo_id = config_signature_to_id<ENABLED_SIMULATIONS>(simulation_type.c_str());
+        ui->simulationTypeSelector->blockSignals(true);
+        auto combo_index = ui->simulationTypeSelector->findData(combo_id);
+        ui->simulationTypeSelector->setCurrentIndex(combo_index);
+        ui->simulationTypeSelector->blockSignals(false);
+        iterate_types_w_heap<init_parameter_table_from_data_functor, ENABLED_SIMULATIONS>(this, parameter_heap);
+        configurations_file_path = new_configurations_file_path;
+        update_configuration_state();
+    } catch (UiException const & e) {
+        std::cerr << e.what() << std::endl;
+        QMessageBox::warning(this, "File open error", "Unable to load and parse file at `" + new_configurations_file_path + "`");
+    }
 }
 
-void MainWindow::save_button_handler() {
-    if (configuration_state == UNSAVED)
-        save_as_button_handler();
+bool MainWindow::save_as() {
+    configurations_file_path = QFileDialog::getSaveFileName(this,
+                                                            "Save configuration as", "/", "XML Files (*.xml)");
 
+    // Check if user canceled
+    if (configurations_file_path.isEmpty())
+        return false;
+
+    return save();
+}
+
+bool MainWindow::save() {
     parameter_heap_t parameters = get_parameters_from_input_current_simulation_type<ENABLED_SIMULATIONS>(this);
     const char * config_signature = get_current_simulation_type_config_signature<ENABLED_SIMULATIONS>(this);
 
@@ -352,19 +444,40 @@ void MainWindow::save_button_handler() {
         write_config_file(configurations_file_path.toStdString(), config_signature, parameters);
     } catch (UiException const & e) {
         QMessageBox::warning(this, "File save error", "Unable to save config file to `" + configurations_file_path + "`");
-        return;
+        return false;
     }
 
+    return true;
+}
 
-    configuration_state = SAVED;
+bool MainWindow::save_as_button_handler() {
+    bool result = save_as();
+    if (result)
+        configuration_state = SAVED;
     update_configuration_state();
+    return result;
+}
+
+bool MainWindow::save_button_handler() {
+    bool result;
+    if (configuration_state == UNSAVED || configuration_state == NONE)
+        result = save_as();
+    else
+        result = save();
+
+    if (result)
+        configuration_state = SAVED;
+    update_configuration_state();
+
+    return result;
 }
 
 void MainWindow::play_button_handler() {
     if (simulation_state == RESET) {
         if (configuration_state != SAVED) {
             // The config must be saved before simulation starts
-            save_button_handler();
+            bool result = save_button_handler();
+            if (!result) return;
         }
         iterate_types<init_simulation_functor, ENABLED_SIMULATIONS>(this);
     }
@@ -377,7 +490,8 @@ void MainWindow::play_all_button_handler() {
     if (simulation_state == RESET) {
         if (configuration_state != SAVED) {
             // The config must be saved before simulation starts
-            save_button_handler();
+            bool result = save_button_handler();
+            if (!result) return;
         }
         iterate_types<init_simulation_functor, ENABLED_SIMULATIONS>(this);
     }

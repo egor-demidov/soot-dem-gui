@@ -36,6 +36,8 @@ public:
 
     template<typename SimulationType>
     void initialize_parameter_table();
+    template<typename SimulationType>
+    void initialize_parameter_table_with_data(parameter_heap_t const & parameters);
     void reset_parameter_table();
 
     template<typename SimulationType>
@@ -59,14 +61,17 @@ private slots:
     void pause_button_handler();
     void new_button_handler();
     void open_button_handler();
-    void save_button_handler();
-    void save_as_button_handler();
+    bool save_button_handler();
+    bool save_as_button_handler();
 
     void parameters_changed();
 
     void simulation_type_combo_handler();
 
 private:
+    bool save();
+    bool save_as();
+
     void lock_parameters();
 
     void unlock_parameters();

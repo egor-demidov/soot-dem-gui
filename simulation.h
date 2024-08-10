@@ -11,6 +11,8 @@
 
 #include <Eigen/Eigen>
 
+#include "exceptions.h"
+
 enum ParameterType {INTEGER, REAL, STRING, PATH};
 
 constexpr const char * parameter_type_to_string(ParameterType type) {
@@ -24,6 +26,20 @@ constexpr const char * parameter_type_to_string(ParameterType type) {
         case PATH:
             return "path";
     }
+}
+
+template<typename Head>
+unsigned int config_signature_to_id(const char * config_signature) {
+    if (strcmp(config_signature, Head::config_file_signature) == 0)
+        return Head::combo_id;
+    throw UiException("Config file signature not found");
+}
+
+template<typename Head, typename Mid, typename... Tail>
+unsigned int config_signature_to_id(const char * config_signature) {
+    if (strcmp(config_signature, Head::config_file_signature) == 0)
+        return Head::combo_id;
+    return config_signature_to_id<Mid, Tail...>(config_signature);
 }
 
 extern ParameterType parameter_type_from_string(const char * string);
