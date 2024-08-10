@@ -18,3 +18,4 @@
 !.github/**
 !dist/
 !dist/**
+!*.ps1
