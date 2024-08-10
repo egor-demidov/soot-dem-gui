@@ -1,11 +1,12 @@
 #!/bin/zsh
 
 APP_DIR=build
-APP_BUNDLE="$APP_DIR/gui_design_soot_dem.app"
-APP_ARCHIVE="$APP_DIR/gui_design_soot_dem.zip"
-APP_DMG="$APP_DIR/gui_design_soot_dem.dmg"
-DMG_NAME="gui_design_soot_dem"
-EXECUTABLE="$APP_BUNDLE/Contents/MacOS/gui_design_soot_dem"
+APP_NAME="soot_dem_gui"
+APP_BUNDLE="$APP_DIR/$APP_NAME.app"
+APP_ARCHIVE="$APP_DIR/$APP_NAME"
+APP_DMG="$APP_DIR/$APP_NAME"
+DMG_NAME="$APP_NAME"
+EXECUTABLE="$APP_BUNDLE/Contents/MacOS/soot_dem_gui"
 IDENTITY="Developer ID Application: Egor Demidov (V8NHL8MF4D)"
 
 
@@ -41,11 +42,11 @@ echo "STAPLED, VERIFYING THE BUNDLE..."
 
 spctl --verbose=4 --assess --type execute $APP_BUNDLE
 
-echo "CREATING RELEASE DMG..."
+#echo "CREATING RELEASE DMG..."
 
-mkdir -p "$APP_DIR/$DMG_NAME"
-ditto $APP_BUNDLE "$APP_DIR/$DMG_NAME"
-hdiutil create -volname $DMG_NAME -srcfolder "$APP_DIR/$DMG_NAME" $APP_DMG
+ditto $APP_BUNDLE "$APP_DIR/${DMG_NAME}_dir/$APP_NAME.app"
+ditto "dist/" "$APP_DIR/${DMG_NAME}_dir/"
+hdiutil create -volname $DMG_NAME -srcfolder "$APP_DIR/${DMG_NAME}_dir" $APP_DMG
 
 # TODO:
 #/usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$ZIP_PATH"

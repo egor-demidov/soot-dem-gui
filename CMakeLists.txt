@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(gui_design_soot_dem VERSION 1.0 LANGUAGES CXX C)
+project(soot_dem_gui VERSION 1.0 LANGUAGES CXX C)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -107,18 +107,18 @@ if (${APPLE})
             MACOSX_PACKAGE_LOCATION "Resources")
 endif ()
 
-add_executable(gui_design_soot_dem MACOSX_BUNDLE ${MACOS_APP_ICON}
+add_executable(soot_dem_gui MACOSX_BUNDLE ${MACOS_APP_ICON}
     ${PROJECT_SOURCES} ${MISC_SOURCES}
 )
 
-target_link_libraries(gui_design_soot_dem PUBLIC Qt${QT_VERSION_MAJOR}::Widgets ${VTK_LIBRARIES})
+target_link_libraries(soot_dem_gui PUBLIC Qt${QT_VERSION_MAJOR}::Widgets ${VTK_LIBRARIES})
 
 if (${MSVC})
-    set_property(TARGET gui_design_soot_dem PROPERTY
+    set_property(TARGET soot_dem_gui PROPERTY
             MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif ()
 
-set_target_properties(gui_design_soot_dem PROPERTIES
+set_target_properties(soot_dem_gui PROPERTIES
     MACOSX_BUNDLE_BUNDLE_NAME "soot-dem-gui by Egor Demidov"
     MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2024 Egor Demidov"
     MACOSX_BUNDLE_GUI_IDENTIFIER com.edemidov.soot-dem-gui
@@ -130,11 +130,11 @@ set_target_properties(gui_design_soot_dem PROPERTIES
 )
 
 if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(gui_design_soot_dem)
+    qt_finalize_executable(soot_dem_gui)
 endif()
 
 vtk_module_autoinit(
-    TARGETS gui_design_soot_dem
+    TARGETS soot_dem_gui
     MODULES ${VTK_LIBRARIES}
 )
 
@@ -143,16 +143,16 @@ if (${APPLE})
 
     install(CODE [[
       include(BundleUtilities)
-      fixup_bundle("${CMAKE_INSTALL_PREFIX}/gui_design_soot_dem.app" "" "")
+      fixup_bundle("${CMAKE_INSTALL_PREFIX}/soot_dem_gui.app" "" "")
     ]] COMPONENT Runtime)
 
-    install(TARGETS gui_design_soot_dem
+    install(TARGETS soot_dem_gui
             BUNDLE  DESTINATION .
             RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     )
 
     qt_generate_deploy_app_script(
-            TARGET gui_design_soot_dem
+            TARGET soot_dem_gui
             OUTPUT_SCRIPT deploy_script
             NO_UNSUPPORTED_PLATFORM_ERROR
     )
