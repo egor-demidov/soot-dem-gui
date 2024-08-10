@@ -54,7 +54,8 @@ public:
             std::vector<Eigen::Vector3d> & x0_buffer,
             std::vector<Eigen::Vector3d> & neck_positions_buffer,
             std::vector<Eigen::Vector3d> & neck_orientations_buffer,
-            parameter_heap_t const & parameter_heap
+            parameter_heap_t const & parameter_heap,
+            std::filesystem::path const & working_directory
     );
 
     std::tuple<

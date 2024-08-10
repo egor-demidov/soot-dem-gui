@@ -352,7 +352,12 @@ void MainWindow::initialize_simulation() {
 
     std::stringstream ss;
     std::vector<Eigen::Vector3d> x0_buffer, neck_positions_buffer, neck_orientations_buffer;
-    simulation = std::make_shared<SimulationType>(ss, x0_buffer, neck_positions_buffer, neck_orientations_buffer, parameter_heap);
+    simulation = std::make_shared<SimulationType>(ss,
+                                                  x0_buffer,
+                                                  neck_positions_buffer,
+                                                  neck_orientations_buffer,
+                                                  parameter_heap,
+                                                  std::filesystem::path(configurations_file_path.toStdString()).parent_path());
     ui->stdoutBox->appendPlainText(QString::fromStdString(ss.str()));
 
     compute_thread.initialize(simulation);

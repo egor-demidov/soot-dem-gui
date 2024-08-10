@@ -9,7 +9,8 @@ RestructuringFixedFractionSimulation::RestructuringFixedFractionSimulation(
             std::vector<Eigen::Vector3d> & x0_buffer,
             std::vector<Eigen::Vector3d> & neck_positions_buffer,
             std::vector<Eigen::Vector3d> & neck_orientations_buffer,
-            parameter_heap_t const & parameter_heap
+            parameter_heap_t const & parameter_heap,
+            std::filesystem::path const & working_directory
     )
     : Simulation(parameter_heap) {
 
@@ -71,11 +72,11 @@ RestructuringFixedFractionSimulation::RestructuringFixedFractionSimulation(
     std::vector<Eigen::Vector3d> x0, v0, theta0, omega0;
 
     if (aggregate_type == "vtk") {
-        x0 = load_vtk_aggregate(aggregate_path, r_part);
+        x0 = load_vtk_aggregate(working_directory / aggregate_path, r_part);
     } else if (aggregate_type == "mackowski") {
-        x0 = load_mackowski_aggregate(aggregate_path, r_part);
+        x0 = load_mackowski_aggregate(working_directory / aggregate_path, r_part);
     } else if (aggregate_type == "flage") {
-        x0 = load_flage_aggregate(aggregate_path, r_part);
+        x0 = load_flage_aggregate(working_directory / aggregate_path, r_part);
     } else {
         std::cerr << "Unrecognized aggregate type: " << aggregate_type << std::endl;
         exit(EXIT_FAILURE);
