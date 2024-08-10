@@ -69,35 +69,35 @@ public:
     static constexpr unsigned int combo_id = 1;
 
     // TODO: remove after debugging
-    static constexpr const char * default_values[]{
-            "1e-19",
-            "9.90975e-07",
-            "1e-09",
-            "5e-13",
-            "5e-09",
-            "2.5e-10",
-            "2.5e-10",
-            "1e-09",
-            "1e-09",
-            "10000",
-            "10000",
-            "10000",
-            "10000",
-            "0.1",
-            "0.1",
-            "1",
-            "1",
-            "1",
-            "1",
-            "1.4e-08",
-            "7e-08",
-            "1700",
-            "1",
-            "15000",
-            "500",
-            "20",
-            "0"
-    };
+//    static constexpr const char * default_values[]{
+//            "1e-19",
+//            "9.90975e-07",
+//            "1e-09",
+//            "5e-13",
+//            "5e-09",
+//            "2.5e-10",
+//            "2.5e-10",
+//            "1e-09",
+//            "1e-09",
+//            "10000",
+//            "10000",
+//            "10000",
+//            "10000",
+//            "0.1",
+//            "0.1",
+//            "1",
+//            "1",
+//            "1",
+//            "1",
+//            "1.4e-08",
+//            "7e-08",
+//            "1700",
+//            "1",
+//            "15000",
+//            "500",
+//            "20",
+//            "0"
+//    };
 
     static constexpr std::tuple<const char *, ParameterType, const char *> PARAMETERS[] {
             {"A", REAL, "Hamaker constant"},
@@ -129,6 +129,7 @@ public:
             {"rng_seed", INTEGER, ""},
     };
     static constexpr size_t N_PARAMETERS = sizeof(PARAMETERS) / sizeof(PARAMETERS[0]);
+    static constexpr const char * default_values[N_PARAMETERS]{0};
 
 
 private:
