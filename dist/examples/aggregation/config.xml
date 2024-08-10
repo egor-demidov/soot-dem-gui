@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simulation type="gui_aggregation">
+    <let id="A" type="real">1e-19</let>
+    <let id="box_size" type="real">9.90975e-07</let>
+    <let id="d_crit" type="real">1e-09</let>
+    <let id="dt" type="real">5e-13</let>
+    <let id="dump_period" type="integer">15000</let>
+    <let id="gamma_n" type="real">5e-09</let>
+    <let id="gamma_o" type="real">2.5e-10</let>
+    <let id="gamma_r" type="real">2.5e-10</let>
+    <let id="gamma_t" type="real">1e-09</let>
+    <let id="h0" type="real">1e-09</let>
+    <let id="k_n" type="real">10000</let>
+    <let id="k_o" type="real">10000</let>
+    <let id="k_r" type="real">10000</let>
+    <let id="k_t" type="real">10000</let>
+    <let id="mu_o" type="real">0.1</let>
+    <let id="mu_r" type="real">0.1</let>
+    <let id="mu_t" type="real">1</let>
+    <let id="n_part" type="integer">500</let>
+    <let id="neighbor_update_period" type="integer">20</let>
+    <let id="phi_o" type="real">1</let>
+    <let id="phi_r" type="real">1</let>
+    <let id="phi_t" type="real">1</let>
+    <let id="r_part" type="real">1.4e-08</let>
+    <let id="r_verlet" type="real">7e-08</let>
+    <let id="rho" type="real">1700</let>
+    <let id="rng_seed" type="integer">0</let>
+    <let id="v0_part" type="real">1</let>
+</simulation>
