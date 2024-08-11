@@ -6,6 +6,7 @@
 #include <QPointer>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QDir>
 
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
@@ -109,26 +110,6 @@ const char * get_current_simulation_type_config_signature(MainWindow * main_wind
         return Head::config_file_signature;
     return get_current_simulation_type_config_signature<Mid, Tail...>(main_window);
 }
-
-//template<typename Head>
-//std::shared_ptr<Simulation> simulation_factory(int combo_id [[maybe_unused]],
-//                                               std::ostream & output_stream,
-//                                               std::vector<Eigen::Vector3d> & x0_buffer,
-//                                               parameter_heap_t const & parameter_heap) {
-//    return std::make_shared<Head>(output_stream, x0_buffer, parameter_heap);
-//}
-//
-//template<typename Head, typename Mid, typename... Tail>
-//std::shared_ptr<Simulation> simulation_factory(int combo_id,
-//                                               std::ostream & output_stream,
-//                                               std::vector<Eigen::Vector3d> & x0_buffer,
-//                                               parameter_heap_t const & parameter_heap) {
-//    if (combo_id == Head::combo_id)
-//        return std::make_shared<Head>(output_stream, x0_buffer, parameter_heap);
-//    return simulation_factory<Mid, Tail...>(combo_id, output_stream, x0_buffer, parameter_heap);
-//}
-
-
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -406,7 +387,7 @@ void MainWindow::open_button_handler() {
     }
 
     QString new_configurations_file_path = QFileDialog::getOpenFileName(this,
-                                                            "Open configuration", "/", "XML Files (*.xml)");
+                                                            "Open configuration", "", "XML Files (*.xml)");
 
     // Check if user canceled
     if (new_configurations_file_path.isEmpty())
@@ -432,7 +413,7 @@ void MainWindow::open_button_handler() {
 
 bool MainWindow::save_as() {
     configurations_file_path = QFileDialog::getSaveFileName(this,
-                                                            "Save configuration as", "/", "XML Files (*.xml)");
+                                                            "Save configuration as", "", "XML Files (*.xml)");
 
     // Check if user canceled
     if (configurations_file_path.isEmpty())
