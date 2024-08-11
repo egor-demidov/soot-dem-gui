@@ -387,7 +387,7 @@ void MainWindow::open_button_handler() {
     }
 
     QString new_configurations_file_path = QFileDialog::getOpenFileName(this,
-                                                            "Open configuration", "", "XML Files (*.xml)");
+                                                            "Open configuration", QDir::homePath(), "XML Files (*.xml)");
 
     // Check if user canceled
     if (new_configurations_file_path.isEmpty())
@@ -413,7 +413,7 @@ void MainWindow::open_button_handler() {
 
 bool MainWindow::save_as() {
     configurations_file_path = QFileDialog::getSaveFileName(this,
-                                                            "Save configuration as", "", "XML Files (*.xml)");
+                                                            "Save configuration as", QDir::homePath(), "XML Files (*.xml)");
 
     // Check if user canceled
     if (configurations_file_path.isEmpty())
