@@ -78,13 +78,11 @@ RestructuringFixedFractionSimulation::RestructuringFixedFractionSimulation(
     } else if (aggregate_type == "flage") {
         x0 = load_flage_aggregate(working_directory / aggregate_path, r_part);
     } else {
-        std::cerr << "Unrecognized aggregate type: " << aggregate_type << std::endl;
-        exit(EXIT_FAILURE);
+        throw UiException("Unrecognized aggregate type: " + aggregate_type);
     }
 
-    if (x0.size() == 0) {
-        std::cerr << "Loaded an empty aggregate" << std::endl;
-        exit(EXIT_FAILURE);
+    if (x0.empty()) {
+        throw UiException("Loaded an empty aggregate");
     }
     output_stream << "Loaded an aggregate of size " << x0.size() << std::endl;
 

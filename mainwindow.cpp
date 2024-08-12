@@ -31,60 +31,66 @@
 
 template<typename T>
 struct init_combo_box_functor {
-    static void apply(MainWindow * main_window) {
+    static bool apply(MainWindow * main_window) {
         main_window->ui->simulationTypeSelector->addItem(T::combo_label, T::combo_id);
+        return true;
     }
 };
 
 template<typename T>
 struct changed_combo_box_functor {
-    static void apply(MainWindow * main_window) {
+    static bool apply(MainWindow * main_window) {
         if (T::combo_id == main_window->ui->simulationTypeSelector->currentData().toInt()) {
             main_window->reset_parameter_table();
-            main_window->initialize_parameter_table<T>();
+            return main_window->initialize_parameter_table<T>();
         }
+        return true;
     }
 };
 
 template<typename T>
 struct init_parameter_table_from_data_functor {
-    static void apply(MainWindow * main_window, parameter_heap_t const & parameters) {
+    static bool apply(MainWindow * main_window, parameter_heap_t const & parameters) {
         if (T::combo_id == main_window->ui->simulationTypeSelector->currentData().toInt()) {
             main_window->reset_parameter_table();
-            main_window->initialize_parameter_table_with_data<T>(parameters);
+            return main_window->initialize_parameter_table_with_data<T>(parameters);
         }
+        return true;
     }
 };
 
 template<typename T>
 struct init_simulation_functor {
-    static void apply(MainWindow * main_window) {
+    static bool apply(MainWindow * main_window) {
         if (T::combo_id == main_window->ui->simulationTypeSelector->currentData().toInt()) {
-            main_window->initialize_simulation<T>();
+            return main_window->initialize_simulation<T>();
         }
+        return true;
     }
 };
 
 template<template<typename> typename functor, typename Head>
-void iterate_types(MainWindow * main_window) {
-    functor<Head>::apply(main_window);
+bool iterate_types(MainWindow * main_window) {
+    return functor<Head>::apply(main_window);
 }
 
 template<template<typename> typename functor, typename Head, typename Mid, typename... Tail>
-void iterate_types(MainWindow * main_window) {
-    functor<Head>::apply(main_window);
-    iterate_types<functor, Mid, Tail...>(main_window);
+bool iterate_types(MainWindow * main_window) {
+    if (!functor<Head>::apply(main_window))
+        return false;
+    return iterate_types<functor, Mid, Tail...>(main_window);
 }
 
 template<template<typename> typename functor, typename Head>
-void iterate_types_w_heap(MainWindow * main_window, parameter_heap_t const & parameters) {
-    functor<Head>::apply(main_window, parameters);
+bool iterate_types_w_heap(MainWindow * main_window, parameter_heap_t const & parameters) {
+    return functor<Head>::apply(main_window, parameters);
 }
 
 template<template<typename> typename functor, typename Head, typename Mid, typename... Tail>
-void iterate_types_w_heap(MainWindow * main_window, parameter_heap_t const & parameters) {
-    functor<Head>::apply(main_window, parameters);
-    iterate_types_w_heap<functor, Mid, Tail...>(main_window, parameters);
+bool iterate_types_w_heap(MainWindow * main_window, parameter_heap_t const & parameters) {
+    if (!functor<Head>::apply(main_window, parameters))
+        return false;
+    return iterate_types_w_heap<functor, Mid, Tail...>(main_window, parameters);
 }
 
 template<typename Head>
@@ -199,7 +205,7 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 template<typename SimulationType>
-void MainWindow::initialize_parameter_table_with_data(parameter_heap_t const & parameters) {
+bool MainWindow::initialize_parameter_table_with_data(parameter_heap_t const & parameters) {
 
     watching_parameter_table = false;
 
@@ -257,10 +263,12 @@ void MainWindow::initialize_parameter_table_with_data(parameter_heap_t const & p
     watching_parameter_table = true;
     configuration_state = SAVED;
     update_configuration_state();
+
+    return true;
 }
 
 template <typename SimulationType>
-void MainWindow::initialize_parameter_table() {
+bool MainWindow::initialize_parameter_table() {
 
     watching_parameter_table = false;
 
@@ -295,6 +303,8 @@ void MainWindow::initialize_parameter_table() {
     watching_parameter_table = true;
     configuration_state = NONE;
     update_configuration_state();
+
+    return true;
 }
 
 void MainWindow::reset_parameter_table() {
@@ -327,24 +337,31 @@ parameter_heap_t MainWindow::get_parameters_from_input() const {
 }
 
 template<typename SimulationType>
-void MainWindow::initialize_simulation() {
+bool MainWindow::initialize_simulation() {
     lock_parameters();
     parameter_heap_t parameter_heap = get_parameters_from_input<SimulationType>();
 
     std::stringstream ss;
     std::vector<Eigen::Vector3d> x0_buffer, neck_positions_buffer, neck_orientations_buffer;
-    simulation = std::make_shared<SimulationType>(ss,
-                                                  x0_buffer,
-                                                  neck_positions_buffer,
-                                                  neck_orientations_buffer,
-                                                  parameter_heap,
-                                                  std::filesystem::path(configurations_file_path.toStdString()).parent_path());
+    try {
+        simulation = std::make_shared<SimulationType>(ss,
+                                                      x0_buffer,
+                                                      neck_positions_buffer,
+                                                      neck_orientations_buffer,
+                                                      parameter_heap,
+                                                      std::filesystem::path(configurations_file_path.toStdString()).parent_path());
+    } catch (std::exception const & e) {
+        return false;
+    }
+
     ui->stdoutBox->appendPlainText(QString::fromStdString(ss.str()));
 
     compute_thread.initialize(simulation);
 
     // TODO: replace constant r_part with parameter
     initialize_preview(x0_buffer, neck_positions_buffer, neck_orientations_buffer, 14e-9);
+
+    return true;
 }
 
 void MainWindow::parameters_changed() {
@@ -465,7 +482,11 @@ void MainWindow::play_button_handler() {
             bool result = save_button_handler();
             if (!result) return;
         }
-        iterate_types<init_simulation_functor, ENABLED_SIMULATIONS>(this);
+        bool result = iterate_types<init_simulation_functor, ENABLED_SIMULATIONS>(this);
+        if (!result) {
+            QMessageBox::warning(this, "Initialization error", "Unable to initialize the simulation. Check parameters and retry.");
+            return;
+        }
     }
     simulation_state = RUN_ONE;
     compute_thread.do_step();

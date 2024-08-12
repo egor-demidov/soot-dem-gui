@@ -35,13 +35,13 @@ public:
 //    void closeEvent(QCloseEvent * event) override;
 
     template<typename SimulationType>
-    void initialize_parameter_table();
+    bool initialize_parameter_table();
     template<typename SimulationType>
-    void initialize_parameter_table_with_data(parameter_heap_t const & parameters);
+    bool initialize_parameter_table_with_data(parameter_heap_t const & parameters);
     void reset_parameter_table();
 
     template<typename SimulationType>
-    void initialize_simulation();
+    bool initialize_simulation();
 
     template<typename SimulationType>
     parameter_heap_t get_parameters_from_input() const;
