@@ -4,16 +4,13 @@
 
 #include "restructuring_fixed_fraction.h"
 
-RestructuringFixedFractionSimulation::RestructuringFixedFractionSimulation(
-            std::ostream & output_stream,
-            std::vector<Eigen::Vector3d> & x0_buffer,
-            std::vector<Eigen::Vector3d> & neck_positions_buffer,
-            std::vector<Eigen::Vector3d> & neck_orientations_buffer,
-            parameter_heap_t const & parameter_heap,
-            std::filesystem::path const & working_directory
-    )
-    : Simulation(parameter_heap) {
+RestructuringFixedFractionSimulation::RestructuringFixedFractionSimulation(parameter_heap_t const & parameter_heap) : Simulation(parameter_heap) {}
 
+bool
+RestructuringFixedFractionSimulation::initialize(std::ostream &output_stream, std::vector<Eigen::Vector3d> &x0_buffer,
+                                                 std::vector<Eigen::Vector3d> &neck_positions_buffer,
+                                                 std::vector<Eigen::Vector3d> &neck_orientations_buffer,
+                                                 const std::filesystem::path &working_directory) {
     auto rng_seed = get_integer_parameter("rng_seed");
 
     // General parameters
@@ -78,11 +75,13 @@ RestructuringFixedFractionSimulation::RestructuringFixedFractionSimulation(
     } else if (aggregate_type == "flage") {
         x0 = load_flage_aggregate(working_directory / aggregate_path, r_part);
     } else {
-        throw UiException("Unrecognized aggregate type: " + aggregate_type);
+        std::cerr << "Unrecognized aggregate type: " << aggregate_type << std::endl;
+        return false;
     }
 
     if (x0.empty()) {
-        throw UiException("Loaded an empty aggregate");
+        std::cerr << "Loaded an empty aggregate" << std::endl;
+        return false;
     }
     output_stream << "Loaded an aggregate of size " << x0.size() << std::endl;
 
@@ -115,8 +114,8 @@ RestructuringFixedFractionSimulation::RestructuringFixedFractionSimulation(
     binary_force_container = std::make_unique<binary_force_container_t>(*aggregate_model, *coating_model);
 
     granular_system = std::make_unique<granular_system_t>(x0.size(), r_verlet, x0,
-              v0, theta0, omega0, 0.0, Eigen::Vector3d::Zero(), 0.0,
-              step_handler_instance, *binary_force_container, *unary_force_container);
+                                                          v0, theta0, omega0, 0.0, Eigen::Vector3d::Zero(), 0.0,
+                                                          step_handler_instance, *binary_force_container, *unary_force_container);
 
     seed_random_engine(rng_seed);
 

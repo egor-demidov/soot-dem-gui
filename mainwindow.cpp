@@ -343,16 +343,16 @@ bool MainWindow::initialize_simulation() {
 
     std::stringstream ss;
     std::vector<Eigen::Vector3d> x0_buffer, neck_positions_buffer, neck_orientations_buffer;
-    try {
-        simulation = std::make_shared<SimulationType>(ss,
-                                                      x0_buffer,
-                                                      neck_positions_buffer,
-                                                      neck_orientations_buffer,
-                                                      parameter_heap,
-                                                      std::filesystem::path(configurations_file_path.toStdString()).parent_path());
-    } catch (std::exception const & e) {
+
+    simulation = std::make_shared<SimulationType>(parameter_heap);
+
+    if (!simulation->initialize(ss,
+                                x0_buffer,
+                                neck_positions_buffer,
+                                neck_orientations_buffer,
+                                std::filesystem::path(configurations_file_path.toStdString()).parent_path()))
         return false;
-    }
+
 
     ui->stdoutBox->appendPlainText(QString::fromStdString(ss.str()));
 

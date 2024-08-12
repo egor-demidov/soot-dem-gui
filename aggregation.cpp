@@ -48,15 +48,13 @@ void bounce_off_walls(std::vector<Eigen::Vector3d> const & particles,
 }
 
 AggregationSimulation::AggregationSimulation(
-            std::ostream & output_stream,
-            std::vector<Eigen::Vector3d> & x0_buffer,
-            std::vector<Eigen::Vector3d> & neck_positions_buffer,
-            std::vector<Eigen::Vector3d> & neck_orientations_buffer,
-            parameter_heap_t const & parameter_heap,
-            std::filesystem::path const & working_directory
-    )
-    : Simulation(parameter_heap) {
+            parameter_heap_t const & parameter_heap
+    ) : Simulation(parameter_heap) {}
 
+bool AggregationSimulation::initialize(std::ostream &output_stream, std::vector<Eigen::Vector3d> &x0_buffer,
+                                       std::vector<Eigen::Vector3d> &neck_positions_buffer,
+                                       std::vector<Eigen::Vector3d> &neck_orientations_buffer,
+                                       const std::filesystem::path &working_directory) {
     auto rng_seed = get_integer_parameter("rng_seed");
 
     // General parameters
@@ -147,8 +145,8 @@ AggregationSimulation::AggregationSimulation(
     unary_force_container = std::make_unique<unary_force_container_t>();
 
     granular_system = std::make_unique<granular_system_neighbor_list_mutable_velocity>(x0.size(), r_verlet, x0,
-                                                          v0, theta0, omega0, 0.0, Eigen::Vector3d::Zero(), 0.0,
-                                                          step_handler_instance, *binary_force_container, *unary_force_container);
+                                                                                       v0, theta0, omega0, 0.0, Eigen::Vector3d::Zero(), 0.0,
+                                                                                       step_handler_instance, *binary_force_container, *unary_force_container);
 }
 
 std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>> AggregationSimulation::perform_iterations() {

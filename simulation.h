@@ -59,11 +59,16 @@ class Simulation {
 public:
     explicit Simulation(parameter_heap_t const & parameter_heap);
     virtual ~Simulation() = default;
+    virtual bool initialize(std::ostream & output_stream,
+                    std::vector<Eigen::Vector3d> & x0_buffer,
+                    std::vector<Eigen::Vector3d> & neck_positions_buffer,
+                    std::vector<Eigen::Vector3d> & neck_orientations_buffer,
+                    std::filesystem::path const & working_directory) = 0;
     virtual std::tuple<
-    std::string,
-    std::vector<Eigen::Vector3d>,
-    std::vector<Eigen::Vector3d>,
-    std::vector<Eigen::Vector3d>> perform_iterations() = 0;
+                    std::string,
+                    std::vector<Eigen::Vector3d>,
+                    std::vector<Eigen::Vector3d>,
+                    std::vector<Eigen::Vector3d>> perform_iterations() = 0;
 
     long get_integer_parameter(std::string const & id) const;
     double get_real_parameter(std::string const & id) const;
