@@ -1,7 +1,24 @@
+// Copyright (C) 2024 Egor Demidov
+// This file is part of soot-dem-gui
+//
+// This program is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the
+// Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty
+// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <https://www.gnu.org/licenses/>.
+
 #include <cmath>
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <climits>
 
 #include <QPointer>
 #include <QFileDialog>
@@ -155,6 +172,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::open_button_handler);
     // Save as button
     connect(ui->actionSaveAs, &QAction::triggered, this, &MainWindow::save_as_button_handler);
+    // About button
+    connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::about_dialog_handler);
 
     connect(ui->simulationTypeSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(simulation_type_combo_handler()));
     connect(ui->parameterTable, &QTableWidget::itemChanged, this, &MainWindow::parameters_changed);
@@ -185,6 +204,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->previewWidget->setLayout(layout);
 
     layout->addWidget(vtkRenderWidget);
+
+    ui->splitter_2->setSizes({INT_MAX, INT_MAX});
 
     // VTK part
     vtk_named_colors = vtkNew<vtkNamedColors>();
@@ -451,6 +472,15 @@ bool MainWindow::save() {
     }
 
     return true;
+}
+
+void MainWindow::about_dialog_handler() {
+    QMessageBox::about(this, "About soot-dem-gui",
+                                        "A GUI for soot-dem project:\nhttps://github.com/egor-demidov/soot-dem\n\n"
+                                        "Contact model description available at:\nhttps://doi.org/10.48550/arXiv.2407.14254\n\n"
+                                        "Source code available at:\nhttps://github.com/egor-demidov/soot-dem-gui\n\n"
+                                       "Copyright (c) 2024, Egor Demidov\n\n"
+                                       "GNU GPL License V3");
 }
 
 bool MainWindow::save_as_button_handler() {
