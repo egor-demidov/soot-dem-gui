@@ -49,10 +49,11 @@ std::string parameter_value_to_string(ParameterType type, ParameterValue const &
 Simulation::Simulation(parameter_heap_t const & parameter_heap,
                        std::filesystem::path const & working_directory)
                         : parameters{parameter_heap}
-                        , simulation_working_directory{working_directory} {
+                        , simulation_working_directory{working_directory}
+                        , dump_directory{working_directory / "run"} {
 
-    if (!std::filesystem::is_directory(working_directory / "run") || !std::filesystem::is_directory(working_directory / "run")) {
-        std::filesystem::create_directory(working_directory / "run"); // create src folder
+    if (!std::filesystem::is_directory(dump_directory) || !std::filesystem::is_directory(dump_directory)) {
+        std::filesystem::create_directory(dump_directory); // create src folder
     }
 }
 

@@ -90,6 +90,7 @@ public:
 protected:
     parameter_heap_t parameters;
     std::filesystem::path simulation_working_directory;
+    std::filesystem::path dump_directory;
 };
 
 #endif //GUI_DESIGN_SOOT_DEM_SIMULATION_H

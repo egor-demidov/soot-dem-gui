@@ -154,10 +154,10 @@ RestructuringFixedFractionSimulation::initialize(std::ostream &output_stream, st
 
     output_stream << "Dump\tTime\tKE\tRMS_disp\tRMS_force";
 
-    dump_particles(simulation_working_directory / "run", current_step / dump_period, granular_system->get_x(),
+    dump_particles(dump_directory.string(), current_step / dump_period, granular_system->get_x(),
                    granular_system->get_v(), granular_system->get_a(),
                    granular_system->get_omega(), granular_system->get_alpha(), r_part);
-    dump_necks(simulation_working_directory / "run", current_step / dump_period, granular_system->get_x(), aggregate_model->get_bonded_contacts(), r_part);
+    dump_necks(dump_directory.string(), current_step / dump_period, granular_system->get_x(), aggregate_model->get_bonded_contacts(), r_part);
 
     return true;
 }
@@ -236,10 +236,10 @@ std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3
     );
     message_out << fmt;
 
-    dump_particles(simulation_working_directory / "run", current_step / dump_period, granular_system->get_x(),
+    dump_particles(dump_directory.string(), current_step / dump_period, granular_system->get_x(),
                    granular_system->get_v(), granular_system->get_a(),
                    granular_system->get_omega(), granular_system->get_alpha(), r_part);
-    dump_necks(simulation_working_directory / "run", current_step / dump_period, granular_system->get_x(), aggregate_model->get_bonded_contacts(), r_part);
+    dump_necks(dump_directory.string(), current_step / dump_period, granular_system->get_x(), aggregate_model->get_bonded_contacts(), r_part);
 
     auto [neck_positions, neck_orientations] = get_neck_information();
 

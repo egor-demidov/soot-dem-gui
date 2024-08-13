@@ -444,7 +444,7 @@ void MainWindow::open_button_handler() {
             "Open configuration",
             configurations_file_path.isEmpty()
                 ? QDir::homePath()
-                : QString::fromStdString(std::filesystem::path(configurations_file_path.toStdString()).parent_path()),
+                : QString::fromStdString(std::filesystem::path(configurations_file_path.toStdString()).parent_path().string()),
             "XML Files (*.xml)"
     );
 
@@ -476,7 +476,7 @@ bool MainWindow::save_as() {
             "Save configuration as",
             configurations_file_path.isEmpty()
                 ? QDir::homePath()
-                : QString::fromStdString(std::filesystem::path(configurations_file_path.toStdString()).parent_path()),
+                : QString::fromStdString(std::filesystem::path(configurations_file_path.toStdString()).parent_path().string()),
             "XML Files (*.xml)"
     );
 

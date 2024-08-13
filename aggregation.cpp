@@ -164,7 +164,7 @@ bool AggregationSimulation::initialize(std::ostream &output_stream, std::vector<
                                                                                        step_handler_instance, *binary_force_container, *unary_force_container);
     output_stream << "Dump\tTime\tKE\tRMS_disp\tRMS_force";
 
-    dump_particles(simulation_working_directory / "run", current_step / dump_period, granular_system->get_x(),
+    dump_particles(dump_directory.string(), current_step / dump_period, granular_system->get_x(),
                    granular_system->get_v(), granular_system->get_a(),
                    granular_system->get_omega(), granular_system->get_alpha(), r_part);
 
@@ -209,7 +209,7 @@ std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3
     );
     message_out << fmt;
 
-    dump_particles(simulation_working_directory / "run", current_step / dump_period, granular_system->get_x(),
+    dump_particles(dump_directory.string(), current_step / dump_period, granular_system->get_x(),
                    granular_system->get_v(), granular_system->get_a(),
                    granular_system->get_omega(), granular_system->get_alpha(), r_part);
 
