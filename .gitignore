@@ -19,5 +19,7 @@
 !dist/
 !dist/**
 !*.ps1
+!public/
+!public/**
 
 dist/*/**/run/
