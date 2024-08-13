@@ -146,6 +146,7 @@ RestructuringFixedFractionSimulation::initialize(std::ostream &output_stream, st
     auto [neck_positions, neck_orientations] = get_neck_information();
     neck_positions_buffer = neck_positions;
     neck_orientations_buffer = neck_orientations;
+    return true;
 }
 
 std::tuple<std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>> RestructuringFixedFractionSimulation::get_neck_information() const {

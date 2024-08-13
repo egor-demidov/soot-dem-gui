@@ -159,6 +159,7 @@ bool AggregationSimulation::initialize(std::ostream &output_stream, std::vector<
     granular_system = std::make_unique<granular_system_neighbor_list_mutable_velocity>(x0.size(), r_verlet, x0,
                                                                                        v0, theta0, omega0, 0.0, Eigen::Vector3d::Zero(), 0.0,
                                                                                        step_handler_instance, *binary_force_container, *unary_force_container);
+    return true;
 }
 
 std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>> AggregationSimulation::perform_iterations() {
