@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+#include <iomanip>
+
 #include "restructuring_fixed_fraction.h"
 
 RestructuringFixedFractionSimulation::RestructuringFixedFractionSimulation(parameter_heap_t const & parameter_heap) : Simulation(parameter_heap) {}
@@ -146,6 +148,9 @@ RestructuringFixedFractionSimulation::initialize(std::ostream &output_stream, st
     auto [neck_positions, neck_orientations] = get_neck_information();
     neck_positions_buffer = neck_positions;
     neck_orientations_buffer = neck_orientations;
+
+    output_stream << "Dump\tTime\tKE\tRMS_disp\tRMS_force";
+
     return true;
 }
 
@@ -187,6 +192,9 @@ std::tuple<std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>> Restructu
 }
 
 std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>> RestructuringFixedFractionSimulation::perform_iterations() {
+
+    std::vector<Eigen::Vector3d> x_before_iter = granular_system->get_x();
+
     for (int i = 0; i < dump_period; i ++) {
         if (current_step % neighbor_update_period == 0) {
             granular_system->update_neighbor_list();
@@ -195,8 +203,19 @@ std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3
         current_step ++;
     }
 
+    double rms_displacement = 0.0;
+
+    for (int i = 0; i < x_before_iter.size(); i ++) {
+        Eigen::Vector3d displacement = x_before_iter[i] - granular_system->get_x()[i];
+        rms_displacement += displacement.dot(displacement);
+    }
+
+    rms_displacement = sqrt(rms_displacement / double(x_before_iter.size()));
+
     std::stringstream message_out;
-    message_out << "Dump #" << current_step / dump_period << " \tt: " << double(current_step) * dt;
+    message_out << current_step / dump_period << "\t" << double(current_step) * dt
+        << "\t" << compute_ke(granular_system->get_v(), granular_system->get_omega(), mass, inertia)
+        << "\t" << rms_displacement;
 
     auto [neck_positions, neck_orientations] = get_neck_information();
 

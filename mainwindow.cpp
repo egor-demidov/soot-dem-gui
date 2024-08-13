@@ -178,6 +178,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->simulationTypeSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(simulation_type_combo_handler()));
     connect(ui->parameterTable, &QTableWidget::itemChanged, this, &MainWindow::parameters_changed);
 
+    ui->stdoutBox->setMaximumBlockCount(500);
+
     // TODO: connect itemChanged to input validator
 
     // Load the monospaced font and make stdout box use it
@@ -197,7 +199,8 @@ MainWindow::MainWindow(QWidget *parent)
     QPointer<QVTKOpenGLNativeWidget> vtkRenderWidget =
             new QVTKOpenGLNativeWidget(ui->previewWidget);
 
-    vtkRenderWidget->setAttribute(Qt::WA_MouseTracking, false);
+    vtkRenderWidget->setAttribute(Qt::WA_MouseTracking, false);  // Required for macOS
+    vtkRenderWidget->setAttribute(Qt::WA_NoMousePropagation, true);  // Required for linux KDE
 
     QPointer<QVBoxLayout> layout = new QVBoxLayout();
 
@@ -424,8 +427,14 @@ void MainWindow::open_button_handler() {
             save_as_button_handler();
     }
 
-    QString new_configurations_file_path = QFileDialog::getOpenFileName(this,
-                                                            "Open configuration", QDir::homePath(), "XML Files (*.xml)");
+    QString new_configurations_file_path = QFileDialog::getOpenFileName(
+            this,
+            "Open configuration",
+            configurations_file_path.isEmpty()
+                ? QDir::homePath()
+                : QString::fromStdString(std::filesystem::path(configurations_file_path.toStdString()).parent_path()),
+            "XML Files (*.xml)"
+    );
 
     // Check if user canceled
     if (new_configurations_file_path.isEmpty())
@@ -450,8 +459,14 @@ void MainWindow::open_button_handler() {
 }
 
 bool MainWindow::save_as() {
-    configurations_file_path = QFileDialog::getSaveFileName(this,
-                                                            "Save configuration as", QDir::homePath(), "XML Files (*.xml)");
+    configurations_file_path = QFileDialog::getSaveFileName(
+            this,
+            "Save configuration as",
+            configurations_file_path.isEmpty()
+                ? QDir::homePath()
+                : QString::fromStdString(std::filesystem::path(configurations_file_path.toStdString()).parent_path()),
+            "XML Files (*.xml)"
+    );
 
     // Check if user canceled
     if (configurations_file_path.isEmpty())
