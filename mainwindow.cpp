@@ -575,6 +575,14 @@ void MainWindow::pause_button_handler() {
 }
 
 void MainWindow::reset_button_handler() {
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, "Confirm reset", "Are you sure you want to reset the simulation? "
+                                                           "It will be impossible to resume the simulation after reset.",
+                                  QMessageBox::Reset | QMessageBox::Cancel);
+
+    if (reply == QMessageBox::Cancel)
+        return;
+
     simulation_state = RESET;
     compute_thread.do_terminate();
     reset_preview();
