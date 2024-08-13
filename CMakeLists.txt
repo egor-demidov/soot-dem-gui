@@ -66,6 +66,8 @@ set(PROJECT_SOURCES
         icons/app.rc
         restructuring_fixed_fraction.cpp
         restructuring_fixed_fraction.h
+        aggregate_deposition.cpp
+        aggregate_deposition.h
         simulation.h
         simulation.cpp
         config.h

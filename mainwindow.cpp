@@ -41,10 +41,11 @@
 
 #include "restructuring_fixed_fraction.h"
 #include "aggregation.h"
+#include "aggregate_deposition.h"
 
 #include "config.h"
 
-#define ENABLED_SIMULATIONS RestructuringFixedFractionSimulation, AggregationSimulation
+#define ENABLED_SIMULATIONS RestructuringFixedFractionSimulation, AggregationSimulation, AggregateDepositionSimulation
 
 template<typename T>
 struct init_combo_box_functor {
@@ -577,7 +578,7 @@ void MainWindow::pause_button_handler() {
 void MainWindow::reset_button_handler() {
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(this, "Confirm reset", "Are you sure you want to reset the simulation? "
-                                                           "It will be impossible to resume the simulation after reset.",
+                                                           "It will be impossible to resume the simulation after the reset",
                                   QMessageBox::Reset | QMessageBox::Cancel);
 
     if (reply == QMessageBox::Cancel)

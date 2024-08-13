@@ -114,7 +114,7 @@ public:
 
     static constexpr const char * DESCRIPTION = "A box of fixed size is filled with\n"
                                                 "primary particles and initial velocities\n"
-                                                "with random directions assigned to\n"
+                                                "with random directions are assigned to\n"
                                                 "all particles. Collisions with box walls\n"
                                                 "are fully elastic.\n\n"
                                                 "This simulates a diffusion-limited\n"
