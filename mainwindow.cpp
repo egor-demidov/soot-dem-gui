@@ -686,9 +686,9 @@ void MainWindow::update_tool_buttons() {
             break;
         }
         case PAUSE: {
-            ui->newButton->setEnabled(true);
-            ui->saveButton->setEnabled(true);
-            ui->openButton->setEnabled(true);
+            ui->newButton->setEnabled(false);
+            ui->saveButton->setEnabled(false);
+            ui->openButton->setEnabled(false);
             ui->playButton->setEnabled(true);
             ui->playAllButton->setEnabled(true);
             ui->pauseButton->setEnabled(false);
@@ -703,7 +703,6 @@ void MainWindow::update_tool_buttons() {
             ui->actionAdvance_Continuously->setEnabled(true);
             ui->actionPause->setEnabled(false);
             ui->actionStop->setEnabled(true);
-            update_configuration_state();
             break;
         }
         case RUN_CONTINUOUS: {
