@@ -46,7 +46,15 @@ std::string parameter_value_to_string(ParameterType type, ParameterValue const &
     }
 }
 
-Simulation::Simulation(parameter_heap_t const & parameter_heap) : parameters{parameter_heap} {}
+Simulation::Simulation(parameter_heap_t const & parameter_heap,
+                       std::filesystem::path const & working_directory)
+                        : parameters{parameter_heap}
+                        , simulation_working_directory{working_directory} {
+
+    if (!std::filesystem::is_directory(working_directory / "run") || !std::filesystem::is_directory(working_directory / "run")) {
+        std::filesystem::create_directory(working_directory / "run"); // create src folder
+    }
+}
 
 long Simulation::get_integer_parameter(std::string const & id) const {
     auto parameter_itr = parameters.find(id);

@@ -63,13 +63,13 @@ void bounce_off_walls(std::vector<Eigen::Vector3d> const & particles,
 }
 
 AggregationSimulation::AggregationSimulation(
-            parameter_heap_t const & parameter_heap
-    ) : Simulation(parameter_heap) {}
+            parameter_heap_t const & parameter_heap,
+            std::filesystem::path const & working_directory
+    ) : Simulation(parameter_heap, working_directory) {}
 
 bool AggregationSimulation::initialize(std::ostream &output_stream, std::vector<Eigen::Vector3d> &x0_buffer,
                                        std::vector<Eigen::Vector3d> &neck_positions_buffer,
-                                       std::vector<Eigen::Vector3d> &neck_orientations_buffer,
-                                       const std::filesystem::path &working_directory) {
+                                       std::vector<Eigen::Vector3d> &neck_orientations_buffer) {
     auto rng_seed = get_integer_parameter("rng_seed");
 
     // General parameters
@@ -164,6 +164,10 @@ bool AggregationSimulation::initialize(std::ostream &output_stream, std::vector<
                                                                                        step_handler_instance, *binary_force_container, *unary_force_container);
     output_stream << "Dump\tTime\tKE\tRMS_disp\tRMS_force";
 
+    dump_particles(simulation_working_directory / "run", current_step / dump_period, granular_system->get_x(),
+                   granular_system->get_v(), granular_system->get_a(),
+                   granular_system->get_omega(), granular_system->get_alpha(), r_part);
+
     return true;
 }
 
@@ -204,6 +208,10 @@ std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3
             rms_force   // rms force acting on particles
     );
     message_out << fmt;
+
+    dump_particles(simulation_working_directory / "run", current_step / dump_period, granular_system->get_x(),
+                   granular_system->get_v(), granular_system->get_a(),
+                   granular_system->get_omega(), granular_system->get_alpha(), r_part);
 
     return {message_out.str(), granular_system->get_x(), {}, {}};
 }

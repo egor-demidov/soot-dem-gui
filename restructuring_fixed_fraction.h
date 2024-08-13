@@ -52,14 +52,14 @@ public:
             rotational_step_handler, binary_force_container_t, unary_force_container_t>;
 
     explicit RestructuringFixedFractionSimulation(
-            parameter_heap_t const & parameter_heap
+            parameter_heap_t const & parameter_heap,
+            std::filesystem::path const & working_directory
     );
 
     bool initialize(std::ostream & output_stream,
                     std::vector<Eigen::Vector3d> & x0_buffer,
                     std::vector<Eigen::Vector3d> & neck_positions_buffer,
-                    std::vector<Eigen::Vector3d> & neck_orientations_buffer,
-                    std::filesystem::path const & working_directory) override;
+                    std::vector<Eigen::Vector3d> & neck_orientations_buffer) override;
 
     std::tuple<
         std::string,

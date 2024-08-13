@@ -19,13 +19,15 @@
 
 #include "restructuring_fixed_fraction.h"
 
-RestructuringFixedFractionSimulation::RestructuringFixedFractionSimulation(parameter_heap_t const & parameter_heap) : Simulation(parameter_heap) {}
+RestructuringFixedFractionSimulation::RestructuringFixedFractionSimulation(
+        parameter_heap_t const & parameter_heap,
+        std::filesystem::path const & working_directory
+) : Simulation(parameter_heap, working_directory) {}
 
 bool
 RestructuringFixedFractionSimulation::initialize(std::ostream &output_stream, std::vector<Eigen::Vector3d> &x0_buffer,
                                                  std::vector<Eigen::Vector3d> &neck_positions_buffer,
-                                                 std::vector<Eigen::Vector3d> &neck_orientations_buffer,
-                                                 const std::filesystem::path &working_directory) {
+                                                 std::vector<Eigen::Vector3d> &neck_orientations_buffer) {
     auto rng_seed = get_integer_parameter("rng_seed");
 
     // General parameters
@@ -84,11 +86,11 @@ RestructuringFixedFractionSimulation::initialize(std::ostream &output_stream, st
     std::vector<Eigen::Vector3d> x0, v0, theta0, omega0;
 
     if (aggregate_type == "vtk") {
-        x0 = load_vtk_aggregate(working_directory / aggregate_path, r_part);
+        x0 = load_vtk_aggregate(simulation_working_directory / aggregate_path, r_part);
     } else if (aggregate_type == "mackowski") {
-        x0 = load_mackowski_aggregate(working_directory / aggregate_path, r_part);
+        x0 = load_mackowski_aggregate(simulation_working_directory / aggregate_path, r_part);
     } else if (aggregate_type == "flage") {
-        x0 = load_flage_aggregate(working_directory / aggregate_path, r_part);
+        x0 = load_flage_aggregate(simulation_working_directory / aggregate_path, r_part);
     } else {
         std::cerr << "Unrecognized aggregate type: " << aggregate_type << std::endl;
         return false;
@@ -151,6 +153,11 @@ RestructuringFixedFractionSimulation::initialize(std::ostream &output_stream, st
     neck_orientations_buffer = neck_orientations;
 
     output_stream << "Dump\tTime\tKE\tRMS_disp\tRMS_force";
+
+    dump_particles(simulation_working_directory / "run", current_step / dump_period, granular_system->get_x(),
+                   granular_system->get_v(), granular_system->get_a(),
+                   granular_system->get_omega(), granular_system->get_alpha(), r_part);
+    dump_necks(simulation_working_directory / "run", current_step / dump_period, granular_system->get_x(), aggregate_model->get_bonded_contacts(), r_part);
 
     return true;
 }
@@ -228,6 +235,11 @@ std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3
             rms_force   // rms force acting on particles
     );
     message_out << fmt;
+
+    dump_particles(simulation_working_directory / "run", current_step / dump_period, granular_system->get_x(),
+                   granular_system->get_v(), granular_system->get_a(),
+                   granular_system->get_omega(), granular_system->get_alpha(), r_part);
+    dump_necks(simulation_working_directory / "run", current_step / dump_period, granular_system->get_x(), aggregate_model->get_bonded_contacts(), r_part);
 
     auto [neck_positions, neck_orientations] = get_neck_information();
 

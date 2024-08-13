@@ -69,13 +69,13 @@ using parameter_heap_t = std::map<std::string, std::pair<ParameterType, Paramete
 
 class Simulation {
 public:
-    explicit Simulation(parameter_heap_t const & parameter_heap);
+    explicit Simulation(parameter_heap_t const & parameter_heap,
+                        std::filesystem::path const & working_directory);
     virtual ~Simulation() = default;
     virtual bool initialize(std::ostream & output_stream,
                     std::vector<Eigen::Vector3d> & x0_buffer,
                     std::vector<Eigen::Vector3d> & neck_positions_buffer,
-                    std::vector<Eigen::Vector3d> & neck_orientations_buffer,
-                    std::filesystem::path const & working_directory) = 0;
+                    std::vector<Eigen::Vector3d> & neck_orientations_buffer) = 0;
     virtual std::tuple<
                     std::string,
                     std::vector<Eigen::Vector3d>,
@@ -89,6 +89,7 @@ public:
 
 protected:
     parameter_heap_t parameters;
+    std::filesystem::path simulation_working_directory;
 };
 
 #endif //GUI_DESIGN_SOOT_DEM_SIMULATION_H

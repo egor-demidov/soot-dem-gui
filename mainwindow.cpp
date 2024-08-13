@@ -381,13 +381,12 @@ bool MainWindow::initialize_simulation() {
     std::stringstream ss;
     std::vector<Eigen::Vector3d> x0_buffer, neck_positions_buffer, neck_orientations_buffer;
 
-    simulation = std::make_shared<SimulationType>(parameter_heap);
+    simulation = std::make_shared<SimulationType>(parameter_heap, std::filesystem::path(configurations_file_path.toStdString()).parent_path());
 
     if (!simulation->initialize(ss,
                                 x0_buffer,
                                 neck_positions_buffer,
-                                neck_orientations_buffer,
-                                std::filesystem::path(configurations_file_path.toStdString()).parent_path()))
+                                neck_orientations_buffer))
         return false;
 
 

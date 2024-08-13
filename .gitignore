@@ -19,3 +19,5 @@
 !dist/
 !dist/**
 !*.ps1
+
+dist/*/**/run/
