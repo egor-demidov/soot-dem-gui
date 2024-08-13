@@ -53,6 +53,17 @@ struct init_combo_box_functor {
         return true;
     }
 };
+template<typename T>
+struct show_about_simulation_dialog_functor {
+    static bool apply(MainWindow * main_window) {
+        if (T::combo_id == main_window->ui->simulationTypeSelector->currentData().toInt()) {
+            QMessageBox::about(main_window, "About " + QString::fromStdString(T::combo_label) + " simulation",
+                               T::DESCRIPTION);
+        }
+        return true;
+    }
+};
+
 
 template<typename T>
 struct changed_combo_box_functor {
@@ -174,6 +185,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionSaveAs, &QAction::triggered, this, &MainWindow::save_as_button_handler);
     // About button
     connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::about_dialog_handler);
+    // About simulation button
+    connect(ui->aboutSimulationButton, &QAbstractButton::clicked, this, &MainWindow::about_simulation_handler);
 
     connect(ui->simulationTypeSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(simulation_type_combo_handler()));
     connect(ui->parameterTable, &QTableWidget::itemChanged, this, &MainWindow::parameters_changed);
@@ -487,6 +500,10 @@ bool MainWindow::save() {
     }
 
     return true;
+}
+
+void MainWindow::about_simulation_handler() {
+    iterate_types<show_about_simulation_dialog_functor, ENABLED_SIMULATIONS>(this);
 }
 
 void MainWindow::about_dialog_handler() {

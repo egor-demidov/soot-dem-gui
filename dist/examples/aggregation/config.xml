@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <simulation type="gui_aggregation">
     <let id="A" type="real">1e-19</let>
-    <let id="box_size" type="real">9.90975e-07</let>
+    <let id="box_size" type="real">5.90975e-07</let>
     <let id="d_crit" type="real">1e-09</let>
     <let id="dt" type="real">5e-13</let>
     <let id="dump_period" type="integer">15000</let>

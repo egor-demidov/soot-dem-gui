@@ -112,6 +112,14 @@ public:
 //            "0"
 //    };
 
+    static constexpr const char * DESCRIPTION = "A box of fixed size is filled with\n"
+                                                "primary particles and initial velocities\n"
+                                                "with random directions assigned to\n"
+                                                "all particles. Collisions with box walls\n"
+                                                "are fully elastic.\n\n"
+                                                "This simulates a diffusion-limited\n"
+                                                "aggregation process.";
+
     static constexpr std::tuple<const char *, ParameterType, const char *> PARAMETERS[] {
             {"A", REAL, "Hamaker constant"},
             {"box_size", REAL, "Simulation box size"},

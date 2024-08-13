@@ -14,6 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+#include <iomanip>
+#include <format>
+
 #include "aggregation.h"
 
 bool particle_overlaps(Eigen::Vector3d const & particle,
@@ -159,10 +162,15 @@ bool AggregationSimulation::initialize(std::ostream &output_stream, std::vector<
     granular_system = std::make_unique<granular_system_neighbor_list_mutable_velocity>(x0.size(), r_verlet, x0,
                                                                                        v0, theta0, omega0, 0.0, Eigen::Vector3d::Zero(), 0.0,
                                                                                        step_handler_instance, *binary_force_container, *unary_force_container);
+    output_stream << "Dump\tTime\tKE\tRMS_disp\tRMS_force";
+
     return true;
 }
 
 std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>> AggregationSimulation::perform_iterations() {
+
+    std::vector<Eigen::Vector3d> x_before_iter = granular_system->get_x();
+
     for (int i = 0; i < dump_period; i ++) {
         if (current_step % neighbor_update_period == 0) {
             granular_system->update_neighbor_list();
@@ -172,8 +180,30 @@ std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3
         current_step ++;
     }
 
+    double rms_displacement = 0.0,
+            rms_force = 0.0;
+
+    for (int i = 0; i < x_before_iter.size(); i ++) {
+        Eigen::Vector3d displacement = x_before_iter[i] - granular_system->get_x()[i];
+        rms_displacement += displacement.dot(displacement);
+
+        Eigen::Vector3d force = granular_system->get_a()[i] * mass;
+        rms_force += force.dot(force);
+    }
+
+    rms_displacement = sqrt(rms_displacement / double(x_before_iter.size()));
+    rms_force = sqrt(rms_force / double(x_before_iter.size()));
+
     std::stringstream message_out;
-    message_out << "Dump #" << current_step / dump_period << " \tt: " << double(current_step) * dt;
+    auto fmt = std::format(
+            "{}\t{:.1e}\t{:.2e}\t{:.2e}\t{:.2e}",   // format string
+            current_step / dump_period,  // dump number
+            double(current_step) * dt,  // time
+            compute_ke(granular_system->get_v(), granular_system->get_omega(), mass, inertia),  // total kinetic energy
+            rms_displacement,   // rms displacement of particles from the last dump
+            rms_force   // rms force acting on particles
+    );
+    message_out << fmt;
 
     return {message_out.str(), granular_system->get_x(), {}, {}};
 }

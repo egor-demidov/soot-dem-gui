@@ -15,6 +15,7 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <iomanip>
+#include <format>
 
 #include "restructuring_fixed_fraction.h"
 
@@ -203,19 +204,30 @@ std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3
         current_step ++;
     }
 
-    double rms_displacement = 0.0;
+    double rms_displacement = 0.0,
+            rms_force = 0.0;
 
     for (int i = 0; i < x_before_iter.size(); i ++) {
         Eigen::Vector3d displacement = x_before_iter[i] - granular_system->get_x()[i];
         rms_displacement += displacement.dot(displacement);
+
+        Eigen::Vector3d force = granular_system->get_a()[i] * mass;
+        rms_force += force.dot(force);
     }
 
     rms_displacement = sqrt(rms_displacement / double(x_before_iter.size()));
+    rms_force = sqrt(rms_force / double(x_before_iter.size()));
 
     std::stringstream message_out;
-    message_out << current_step / dump_period << "\t" << double(current_step) * dt
-        << "\t" << compute_ke(granular_system->get_v(), granular_system->get_omega(), mass, inertia)
-        << "\t" << rms_displacement;
+    auto fmt = std::format(
+            "{}\t{:.1e}\t{:.2e}\t{:.2e}\t{:.2e}",   // format string
+            current_step / dump_period,  // dump number
+            double(current_step) * dt,  // time
+            compute_ke(granular_system->get_v(), granular_system->get_omega(), mass, inertia),  // total kinetic energy
+            rms_displacement,   // rms displacement of particles from the last dump
+            rms_force   // rms force acting on particles
+    );
+    message_out << fmt;
 
     auto [neck_positions, neck_orientations] = get_neck_information();
 

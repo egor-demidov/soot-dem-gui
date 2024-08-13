@@ -70,6 +70,7 @@ private slots:
                            QVector<Eigen::Vector3d> const & neck_positions,
                            QVector<Eigen::Vector3d> const & neck_orientations);
 
+    void about_simulation_handler();
     void about_dialog_handler();
     void pause_done();
     void reset_button_handler();
