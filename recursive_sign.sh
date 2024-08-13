@@ -44,9 +44,9 @@ spctl --verbose=4 --assess --type execute $APP_BUNDLE
 
 #echo "CREATING RELEASE DMG..."
 
-ditto $APP_BUNDLE "$APP_DIR/${DMG_NAME}_dir/$APP_NAME.app"
-ditto "dist/" "$APP_DIR/${DMG_NAME}_dir/"
-hdiutil create -volname $DMG_NAME -srcfolder "$APP_DIR/${DMG_NAME}_dir" $APP_DMG
+ditto --rsrc $APP_BUNDLE "$APP_DIR/${DMG_NAME}_dir/$APP_NAME.app"
+ditto --rsrc "dist/" "$APP_DIR/${DMG_NAME}_dir/"
+hdiutil create -srcfolder "$APP_DIR/${DMG_NAME}_dir" $APP_DMG
 
 # TODO:
 #/usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$ZIP_PATH"
