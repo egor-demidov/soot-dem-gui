@@ -48,7 +48,7 @@
            </property>
            <property name="icon">
             <iconset resource="icons/icons.qrc">
-             <normaloff>:/icons/new.png</normaloff>:/icons/new.png</iconset>
+             <normaloff>:/icons/new.svg</normaloff>:/icons/new.svg</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -74,7 +74,7 @@
            </property>
            <property name="icon">
             <iconset resource="icons/icons.qrc">
-             <normaloff>:/icons/open.png</normaloff>:/icons/open.png</iconset>
+             <normaloff>:/icons/open.svg</normaloff>:/icons/open.svg</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -103,7 +103,7 @@
            </property>
            <property name="icon">
             <iconset resource="icons/icons.qrc">
-             <normaloff>:/icons/save.png</normaloff>:/icons/save.png</iconset>
+             <normaloff>:/icons/save.svg</normaloff>:/icons/save.svg</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -136,7 +136,7 @@
            </property>
            <property name="icon">
             <iconset resource="icons/icons.qrc">
-             <normaloff>:/icons/play.png</normaloff>:/icons/play.png</iconset>
+             <normaloff>:/icons/play.svg</normaloff>:/icons/play.svg</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -162,7 +162,7 @@
            </property>
            <property name="icon">
             <iconset resource="icons/icons.qrc">
-             <normaloff>:/icons/play_all.png</normaloff>:/icons/play_all.png</iconset>
+             <normaloff>:/icons/play_all.svg</normaloff>:/icons/play_all.svg</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -194,7 +194,7 @@
            </property>
            <property name="icon">
             <iconset resource="icons/icons.qrc">
-             <normaloff>:/icons/pause.png</normaloff>:/icons/pause.png</iconset>
+             <normaloff>:/icons/pause.svg</normaloff>:/icons/pause.svg</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -223,7 +223,7 @@
            </property>
            <property name="icon">
             <iconset resource="icons/icons.qrc">
-             <normaloff>:/icons/reset.png</normaloff>:/icons/reset.png</iconset>
+             <normaloff>:/icons/reset.svg</normaloff>:/icons/reset.svg</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -266,7 +266,7 @@
            </property>
            <property name="icon">
             <iconset resource="icons/icons.qrc">
-             <normaloff>:/icons/question.png</normaloff>:/icons/question.png</iconset>
+             <normaloff>:/icons/question.svg</normaloff>:/icons/question.svg</iconset>
            </property>
            <property name="iconSize">
             <size>

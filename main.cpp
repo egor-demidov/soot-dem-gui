@@ -19,13 +19,14 @@
 #include <QApplication>
 #include <QSurfaceFormat>
 #include <QFontDatabase>
+#include <QStyleHints>
 #include <QVTKOpenGLNativeWidget.h>
 
 int main(int argc, char *argv[])
 {
     QSurfaceFormat::setDefaultFormat(QVTKOpenGLNativeWidget::defaultFormat());
-
     qRegisterMetaType<QVector<int> >("QVector<Eigen::Vector3d>");
+    QIcon::setThemeName("light");
     QApplication a(argc, argv);
     a.setAttribute(Qt::AA_SynthesizeMouseForUnhandledTouchEvents, false);
     MainWindow w;
