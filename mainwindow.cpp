@@ -38,6 +38,9 @@
 #include <vtkProperty.h>
 #include <vtkRenderer.h>
 #include <vtkSphereSource.h>
+#include <vtkPolygon.h>
+#include <vtkCellArray.h>
+#include <vtkPolyData.h>
 
 #include "restructuring_fixed_fraction.h"
 #include "aggregation.h"
@@ -240,6 +243,37 @@ MainWindow::MainWindow(QWidget *parent)
     vtk_cylinder_source->SetRadius(0.75);
     vtk_cylinder_source->SetHeight(1.5);
     vtk_cylinder_source->SetResolution(30);
+
+//    vtkNew<vtkPoints> points;
+//    points->InsertNextPoint(0.0, 0.0, 0.0);
+//    points->InsertNextPoint(1.0, 0.0, 0.0);
+//    points->InsertNextPoint(1.0, 1.0, 0.0);
+//    points->InsertNextPoint(0.0, 1.0, 0.0);
+//
+//    vtkNew<vtkPolygon> polygon;
+//    polygon->GetPointIds()->SetNumberOfIds(4); // make a quad
+//    polygon->GetPointIds()->SetId(0, 0);
+//    polygon->GetPointIds()->SetId(1, 1);
+//    polygon->GetPointIds()->SetId(2, 2);
+//    polygon->GetPointIds()->SetId(3, 3);
+//
+//    // Add the polygon to a list of polygons
+//    vtkNew<vtkCellArray> polygons;
+//    polygons->InsertNextCell(polygon);
+//
+//    // Create a PolyData
+//    vtkNew<vtkPolyData> polygonPolyData;
+//    polygonPolyData->SetPoints(points);
+//    polygonPolyData->SetPolys(polygons);
+//
+//    // Create a mapper and actor
+//    vtkNew<vtkPolyDataMapper> mapper;
+//    mapper->SetInputData(polygonPolyData);
+//
+//    vtkNew<vtkActor> actor;
+//    actor->SetMapper(mapper);
+//
+//    vtk_renderer->AddActor(actor);
 }
 
 template<typename SimulationType>
