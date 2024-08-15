@@ -423,7 +423,7 @@
     <addaction name="actionPause"/>
     <addaction name="actionStop"/>
     <addaction name="separator"/>
-    <addaction name="actionAbout_simulation_type"/>
+    <addaction name="actionInfoAbout_simulation_type"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSimulation"/>
@@ -474,7 +474,7 @@
     <string>&amp;About...</string>
    </property>
   </action>
-  <action name="actionAbout_simulation_type">
+  <action name="actionInfoAbout_simulation_type">
    <property name="text">
     <string>About simulation type...</string>
    </property>
