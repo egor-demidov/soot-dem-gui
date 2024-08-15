@@ -11,6 +11,7 @@
 !fonts/
 !fonts/**
 !.gitignore
+!.gitmodules
 !deps/
 !deps/**
 !*.json
@@ -21,5 +22,12 @@
 !*.ps1
 !public/
 !public/**
+!src/
+!src/**
 
+# Output from test runs
 dist/*/**/run/
+
+# Apple notarization log
+developer_log.json
+

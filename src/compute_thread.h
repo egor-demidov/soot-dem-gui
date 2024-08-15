@@ -19,11 +19,11 @@
 
 #include <numeric>
 
-#include <QThread>
-#include <QMutex>
-#include <QMutexLocker>
-#include <QWaitCondition>
-#include <QSize>
+#include "vcpkg_installed/x64-windows-static/include/Qt6/QtCore/QThread"
+#include "vcpkg_installed/x64-windows-static/include/Qt6/QtCore/QMutex"
+#include "vcpkg_installed/x64-windows-static/include/Qt6/QtCore/QMutexLocker"
+#include "vcpkg_installed/x64-windows-static/include/Qt6/QtCore/QWaitCondition"
+#include "vcpkg_installed/x64-windows-static/include/Qt6/QtCore/QSize"
 
 #include "restructuring_fixed_fraction.h"
 

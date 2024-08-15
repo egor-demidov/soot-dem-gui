@@ -53,26 +53,26 @@ if(NOT DEFINED VTK_QT_VERSION)
 endif()
 
 set(PROJECT_SOURCES
-        main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
-        compute_thread.h
-        compute_thread.cpp
-        aggregation.h
-        aggregation.cpp
+        src/main.cpp
+        src/mainwindow.cpp
+        src/mainwindow.h
+        src/mainwindow.ui
+        src/compute_thread.h
+        src/compute_thread.cpp
+        src/aggregation.h
+        src/aggregation.cpp
         icons/icons.qrc
         fonts/fonts.qrc
         icons/app.rc
-        restructuring_fixed_fraction.cpp
-        restructuring_fixed_fraction.h
-        aggregate_deposition.cpp
-        aggregate_deposition.h
-        simulation.h
-        simulation.cpp
-        config.h
-        config.cpp
-        exceptions.h
+        src/restructuring_fixed_fraction.cpp
+        src/restructuring_fixed_fraction.h
+        src/aggregate_deposition.cpp
+        src/aggregate_deposition.h
+        src/simulation.h
+        src/simulation.cpp
+        src/config.h
+        src/config.cpp
+        src/exceptions.h
 )
 
 add_compile_definitions(LIBGRAN_USE_OMP)
@@ -102,7 +102,7 @@ set(MISC_SOURCES
     deps/soot-dem/src/random_engine.cpp
     deps/soot-dem/src/reader.cpp
     deps/soot-dem/src/writer.cpp
-        simulation.cpp
+        src/simulation.cpp
 )
 
 if (${APPLE})

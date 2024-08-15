@@ -15,7 +15,7 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <iostream>
-#include <tinyxml2/tinyxml2.h>
+#include "deps/tinyxml2/tinyxml2.h"
 
 #include "config.h"
 
