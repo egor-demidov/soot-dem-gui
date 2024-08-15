@@ -57,6 +57,9 @@ set(PROJECT_SOURCES
         src/mainwindow.cpp
         src/mainwindow.h
         src/mainwindow.ui
+        src/aboutdialog.ui
+        src/aboutdialog.h
+        src/aboutdialog.cpp
         src/compute_thread.h
         src/compute_thread.cpp
         src/aggregation.h
