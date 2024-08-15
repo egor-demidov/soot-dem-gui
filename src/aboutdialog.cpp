@@ -11,7 +11,7 @@ AboutDialog::AboutDialog(QWidget *parent)
 {
     ui->setupUi(this);
 
-    connect(ui->buttonBox, &QDialogButtonBox::clicked, this, &AboutDialog::ok_button_handler);
+    connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &AboutDialog::ok_button_handler);
 }
 
 AboutDialog::~AboutDialog() = default;
