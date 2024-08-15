@@ -476,7 +476,7 @@
   </action>
   <action name="actionInfoAbout_simulation_type">
    <property name="text">
-    <string>About simulation type...</string>
+    <string>Information about simulation type...</string>
    </property>
   </action>
  </widget>
