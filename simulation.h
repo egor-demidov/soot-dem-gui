@@ -21,7 +21,7 @@
 #include <filesystem>
 #include <map>
 
-#include "deps/eigen/Eigen/Eigen"
+#include <Eigen/Eigen>
 
 #include "exceptions.h"
 

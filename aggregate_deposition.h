@@ -25,21 +25,21 @@
 #include <iomanip>
 #include <filesystem>
 
-#include "deps/eigen/Eigen/Eigen"
+#include <Eigen/Eigen>
 
-#include "deps/libgran/include/libgran/hamaker_force/hamaker_force.h"
-#include "deps/libgran/include/libgran/granular_system/granular_system_neighbor_list.h"
+#include <libgran/hamaker_force/hamaker_force.h>
+#include <libgran/granular_system/granular_system_neighbor_list.h>
 
-#include "deps/soot-dem/src/coating_force.h"
-#include "deps/soot-dem/src/rect_substrate.h"
-#include "deps/soot-dem/src/aggregate.h"
+#include <coating_force.h>
+#include <rect_substrate.h>
+#include <aggregate.h>
 
-#include "deps/soot-dem/src/writer.h"
-#include "deps/soot-dem/src/energy.h"
-#include "deps/soot-dem/src/reader.h"
-#include "deps/soot-dem/src/aggregate_stats.h"
-#include "deps/soot-dem/src/random_engine.h"
-#include "deps/soot-dem/src/break_neck.h"
+#include <writer.h>
+#include <energy.h>
+#include <reader.h>
+#include <aggregate_stats.h>
+#include <random_engine.h>
+#include <break_neck.h>
 
 #include "simulation.h"
 
