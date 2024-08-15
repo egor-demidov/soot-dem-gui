@@ -76,6 +76,7 @@ set(PROJECT_SOURCES
         fonts/fonts.qrc
         icons/icons.qrc
         icons/app.rc
+        html/html.qrc
 )
 
 add_compile_definitions(LIBGRAN_USE_OMP)

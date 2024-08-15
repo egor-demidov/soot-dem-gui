@@ -42,6 +42,8 @@
 #include <vtkCellArray.h>
 #include <vtkPolyData.h>
 
+#include "aboutdialog.h"
+
 #include "restructuring_fixed_fraction.h"
 #include "aggregation.h"
 #include "aggregate_deposition.h"
@@ -543,14 +545,17 @@ void MainWindow::about_simulation_handler() {
 }
 
 void MainWindow::about_dialog_handler() {
-    QMessageBox::about(this, "About soot-dem-gui",
+    AboutDialog aboutDialog(this);
+    aboutDialog.show();
+    aboutDialog.exec();
+    /*QMessageBox::about(this, "About soot-dem-gui",
                                         "A GUI for soot-dem project:\nhttps://github.com/egor-demidov/soot-dem\n\n"
                                         "Contact model description available at:\nhttps://doi.org/10.48550/arXiv.2407.14254\n\n"
                                         "Source code available at:\nhttps://github.com/egor-demidov/soot-dem-gui\n\n"
                                         "Feedback and questions to:\nmail@edemidov.com\n\n"
                                         "Project funded by:\nU.S. N.S.F. Award #AGS-2222104\n\n"
                                        "Copyright (c) 2024, Egor Demidov\n\n"
-                                       "GNU GPL License V3");
+                                       "GNU GPL License V3");*/
 }
 
 bool MainWindow::save_as_button_handler() {

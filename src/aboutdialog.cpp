@@ -10,5 +10,12 @@ AboutDialog::AboutDialog(QWidget *parent)
     , ui{std::make_unique<Ui::AboutDialog>()}
 {
     ui->setupUi(this);
+
+    connect(ui->buttonBox, &QDialogButtonBox::clicked, this, &AboutDialog::ok_button_handler);
 }
 
+AboutDialog::~AboutDialog() = default;
+
+void AboutDialog::ok_button_handler() {
+    this->close();
+}

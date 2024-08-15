@@ -8,6 +8,8 @@
 !*.sh
 !icons/
 !icons/**
+!html/
+!html/**
 !fonts/
 !fonts/**
 !.gitignore
