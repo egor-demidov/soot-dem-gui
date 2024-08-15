@@ -193,6 +193,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::about_dialog_handler);
     // About simulation button
     connect(ui->aboutSimulationButton, &QAbstractButton::clicked, this, &MainWindow::about_simulation_handler);
+    connect(ui->actionAbout_simulation_type, &QAction::triggered, this, &MainWindow::about_simulation_handler);
 
     connect(ui->simulationTypeSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(simulation_type_combo_handler()));
     connect(ui->parameterTable, &QTableWidget::itemChanged, this, &MainWindow::parameters_changed);

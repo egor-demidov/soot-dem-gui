@@ -12,6 +12,8 @@ AboutDialog::AboutDialog(QWidget *parent)
     ui->setupUi(this);
 
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &AboutDialog::ok_button_handler);
+
+    ui->versionLabel->setText(ui->versionLabel->text() + PROJECT_VERSION_STRING);
 }
 
 AboutDialog::~AboutDialog() = default;

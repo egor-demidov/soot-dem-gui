@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(soot_dem_gui VERSION 0.2 LANGUAGES CXX C)
+project(soot_dem_gui VERSION 1.0 LANGUAGES CXX C)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -79,6 +79,7 @@ set(PROJECT_SOURCES
         html/html.qrc
 )
 
+add_compile_definitions("PROJECT_VERSION_STRING=\"${CMAKE_PROJECT_VERSION}\"")
 add_compile_definitions(LIBGRAN_USE_OMP)
 add_compile_definitions(_USE_MATH_DEFINES)
 
