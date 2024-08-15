@@ -48,7 +48,7 @@
 
 #include "config.h"
 
-#define ENABLED_SIMULATIONS RestructuringFixedFractionSimulation, AggregationSimulation, AggregateDepositionSimulation
+#define ENABLED_SIMULATIONS RestructuringFixedFractionSimulation, AggregationSimulation//, AggregateDepositionSimulation
 
 template<typename T>
 struct init_combo_box_functor {
@@ -421,9 +421,11 @@ bool MainWindow::initialize_simulation() {
     if (!simulation->initialize(ss,
                                 x0_buffer,
                                 neck_positions_buffer,
-                                neck_orientations_buffer))
-        return false;
+                                neck_orientations_buffer)) {
 
+        unlock_parameters();
+        return false;
+    }
 
     ui->stdoutBox->appendPlainText(QString::fromStdString(ss.str()));
 
@@ -545,6 +547,8 @@ void MainWindow::about_dialog_handler() {
                                         "A GUI for soot-dem project:\nhttps://github.com/egor-demidov/soot-dem\n\n"
                                         "Contact model description available at:\nhttps://doi.org/10.48550/arXiv.2407.14254\n\n"
                                         "Source code available at:\nhttps://github.com/egor-demidov/soot-dem-gui\n\n"
+                                        "Feedback and questions to:\nmail@edemidov.com\n\n"
+                                        "Project funded by:\nU.S. N.S.F. Award #AGS-2222104\n\n"
                                        "Copyright (c) 2024, Egor Demidov\n\n"
                                        "GNU GPL License V3");
 }
@@ -596,7 +600,11 @@ void MainWindow::play_all_button_handler() {
             bool result = save_button_handler();
             if (!result) return;
         }
-        iterate_types<init_simulation_functor, ENABLED_SIMULATIONS>(this);
+        bool result = iterate_types<init_simulation_functor, ENABLED_SIMULATIONS>(this);
+        if (!result) {
+            QMessageBox::warning(this, "Initialization error", "Unable to initialize the simulation. Check parameters and retry.");
+            return;
+        }
     }
     simulation_state = RUN_CONTINUOUS;
     compute_thread.do_continuous_steps();
