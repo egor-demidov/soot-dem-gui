@@ -4,8 +4,7 @@ APP_DIR=build
 APP_NAME="soot_dem_gui"
 APP_BUNDLE="$APP_DIR/$APP_NAME.app"
 APP_ARCHIVE="$APP_DIR/$APP_NAME"
-APP_DMG="$APP_DIR/${APP_NAME}-macos-arm64"
-DMG_NAME="$APP_NAME"
+ZIP_NAME="$APP_DIR/${APP_NAME}-macos-arm64"
 EXECUTABLE="$APP_BUNDLE/Contents/MacOS/soot_dem_gui"
 IDENTITY="Developer ID Application: Egor Demidov (V8NHL8MF4D)"
 
@@ -44,9 +43,9 @@ spctl --verbose=4 --assess --type execute $APP_BUNDLE
 
 #echo "CREATING RELEASE DMG..."
 
-ditto --rsrc $APP_BUNDLE "$APP_DIR/${DMG_NAME}_dir/$APP_NAME.app"
-ditto --rsrc "dist/" "$APP_DIR/${DMG_NAME}_dir/"
-hdiutil create -srcfolder "$APP_DIR/${DMG_NAME}_dir" $APP_DMG
+ditto --rsrc $APP_BUNDLE "$ZIP_NAME/$APP_NAME.app"
+ditto --rsrc "dist/" $ZIP_NAME
+ditto -c -k --sequesterRsrc --keepParent $ZIP_NAME "$ZIP_NAME.zip"
 
 # TODO:
 #/usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$ZIP_PATH"
