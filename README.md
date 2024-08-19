@@ -5,7 +5,7 @@
 Software for soot aggregate mechanics simulations with a
 graphical user interface. Description of the contact model is available
 in the preprint. A tutorial is available on [Egor Demidov's web page](https://www.edemidov.com/posts/soot-dem-gui).
-Windows and macOS binaries can be downloaded in the [releases section](/egor-demidov/soot-dem-gui/releases) of this
+Windows and macOS binaries can be downloaded in the [releases section](https://github.com/egor-demidov/soot-dem-gui/releases) of this
 repository. See below for instructions on building from source.
 
 ### Building from source
