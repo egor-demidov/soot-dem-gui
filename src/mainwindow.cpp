@@ -594,20 +594,6 @@ void MainWindow::closeEvent(QCloseEvent * event) {
 }
 
 void MainWindow::close_handler() {
-    if (configuration_state == UNSAVED || configuration_state == PATH_CHOSEN) {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, "Unsaved changes", "There are unsaved changes. "
-                                                               "Would you like to save the current configuration before closing soot-dem-gui?",
-                                      QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
-
-        if (reply == QMessageBox::Cancel)
-            return;
-        if (reply == QMessageBox::Yes) {
-            bool result = save_as_button_handler();
-            if (!result) return;
-        }
-    }
-
     close();
 }
 
