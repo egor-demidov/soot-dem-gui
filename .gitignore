@@ -32,3 +32,5 @@
 dist/*/**/run/
 # Apple notarization log
 developer_log.json
+# Temporary files created by Qt Designer from flathub
+.xdp-qt_temp.*
