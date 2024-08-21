@@ -195,10 +195,10 @@
             <bool>false</bool>
            </property>
            <property name="toolTip">
-            <string>Reset simulation state</string>
+            <string>Stop simulation and clear output</string>
            </property>
            <property name="statusTip">
-            <string>Reset Simulation</string>
+            <string>Stop Simulation</string>
            </property>
            <property name="text">
             <string>...</string>
