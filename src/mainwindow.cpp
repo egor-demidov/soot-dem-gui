@@ -202,6 +202,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionSaveAs, &QAction::triggered, this, &MainWindow::save_as_button_handler);
     // About button
     connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::about_dialog_handler);
+    // Close window button
+    connect(ui->actionClose_window, &QAction::triggered, this, &MainWindow::close_handler);
     // About simulation button
     connect(ui->aboutSimulationButton, &QAbstractButton::clicked, this, &MainWindow::about_simulation_handler);
     connect(ui->actionInfoAbout_simulation_type, &QAction::triggered, this, &MainWindow::about_simulation_handler);
@@ -472,13 +474,15 @@ void MainWindow::new_button_handler() {
     if (configuration_state == UNSAVED || configuration_state == PATH_CHOSEN) {
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(this, "Unsaved changes", "There are unsaved changes. "
-                                                               "Would you like to save the current configuration starting a blank simulation?",
+                                                               "Would you like to save the current configuration before starting a blank simulation?",
                                       QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
 
         if (reply == QMessageBox::Cancel)
             return;
-        if (reply == QMessageBox::Yes)
-            save_as_button_handler();
+        if (reply == QMessageBox::Yes) {
+            bool result = save_as_button_handler();
+            if (!result) return;
+        }
     }
 
     iterate_types<changed_combo_box_functor, ENABLED_SIMULATIONS>(this);
@@ -493,8 +497,10 @@ void MainWindow::open_button_handler() {
 
         if (reply == QMessageBox::Cancel)
             return;
-        if (reply == QMessageBox::Yes)
-            save_as_button_handler();
+        if (reply == QMessageBox::Yes) {
+            bool result = save_as_button_handler();
+            if (!result) return;
+        }
     }
 
     QString new_configurations_file_path = QFileDialog::getOpenFileName(
@@ -562,6 +568,47 @@ bool MainWindow::save() {
     }
 
     return true;
+}
+
+void MainWindow::closeEvent(QCloseEvent * event) {
+    if (configuration_state == UNSAVED || configuration_state == PATH_CHOSEN) {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "Unsaved changes", "There are unsaved changes. "
+                                                               "Would you like to save the current configuration before closing soot-dem-gui?",
+                                      QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+
+        if (reply == QMessageBox::Cancel) {
+            event->ignore();
+            return;
+        }
+        if (reply == QMessageBox::Yes) {
+            bool result = save_as_button_handler();
+            if (!result) {
+                event->ignore();
+                return;
+            }
+        }
+    }
+
+    event->accept();
+}
+
+void MainWindow::close_handler() {
+    if (configuration_state == UNSAVED || configuration_state == PATH_CHOSEN) {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "Unsaved changes", "There are unsaved changes. "
+                                                               "Would you like to save the current configuration before closing soot-dem-gui?",
+                                      QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+
+        if (reply == QMessageBox::Cancel)
+            return;
+        if (reply == QMessageBox::Yes) {
+            bool result = save_as_button_handler();
+            if (!result) return;
+        }
+    }
+
+    close();
 }
 
 void MainWindow::about_simulation_handler() {

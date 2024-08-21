@@ -79,6 +79,7 @@ private slots:
     void pause_button_handler();
     void new_button_handler();
     void open_button_handler();
+    void close_handler();
     bool save_button_handler();
     bool save_as_button_handler();
 
@@ -87,6 +88,9 @@ private slots:
     void simulation_type_combo_handler();
 
 private:
+    // Override the close event handler
+    void closeEvent(QCloseEvent * event) override;
+
     bool save();
     bool save_as();
 
