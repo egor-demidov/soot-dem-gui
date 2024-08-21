@@ -413,6 +413,7 @@
     <addaction name="actionSave"/>
     <addaction name="actionSaveAs"/>
     <addaction name="actionOpen"/>
+    <addaction name="actionClose_window"/>
    </widget>
    <widget class="QMenu" name="menuSimulation">
     <property name="title">
@@ -477,6 +478,14 @@
   <action name="actionInfoAbout_simulation_type">
    <property name="text">
     <string>Information about simulation type...</string>
+   </property>
+  </action>
+  <action name="actionClose_window">
+   <property name="text">
+    <string>Close window</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
    </property>
   </action>
  </widget>
