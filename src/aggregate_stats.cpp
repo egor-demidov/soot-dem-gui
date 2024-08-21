@@ -2,7 +2,38 @@
 // Created by Egor on 8/21/2024.
 //
 
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Polyhedron_3.h>
+#include <CGAL/Surface_mesh.h>
+#include <CGAL/convex_hull_3.h>
+#include <CGAL/Polygon_mesh_processing/measure.h>
+
 #include "aggregate_stats.h"
+
+typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+typedef CGAL::Polyhedron_3<K> Polyhedron_3;
+typedef K::Point_3 Point_3;
+typedef CGAL::Surface_mesh<Point_3> Surface_mesh;
+
+double compute_convexity(std::vector<Eigen::Vector3d> const & x, double r_part) {
+    std::vector<Point_3> points(x.size());
+
+    for (int n = 0; n < x.size(); n ++) {
+        points[n] = {
+                x[n][0],
+                x[n][1],
+                x[n][2]
+        };
+    }
+
+    Polyhedron_3 poly;
+    CGAL::convex_hull_3(points.begin(), points.end(), poly);
+
+    double volume_convex_hull = CGAL::Polygon_mesh_processing::volume(poly);
+    double volume_aggregate = double(x.size()) * 4.0f / 3.0f * M_PI * pow(r_part, 3.0);
+
+    return volume_aggregate / volume_convex_hull;
+}
 
 void recursive_edge_traversal(AggregateGraph & graph,
                               std::vector<bool> & visited_edges,

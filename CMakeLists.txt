@@ -52,6 +52,8 @@ if(NOT DEFINED VTK_QT_VERSION)
     set(VTK_QT_VERSION 5)
 endif()
 
+find_package(CGAL REQUIRED)
+
 set(PROJECT_SOURCES
         src/main.cpp
         src/mainwindow.cpp
@@ -126,7 +128,7 @@ add_executable(soot_dem_gui MACOSX_BUNDLE ${MACOS_APP_ICON}
     ${PROJECT_SOURCES} ${MISC_SOURCES}
 )
 
-target_link_libraries(soot_dem_gui PUBLIC Qt${QT_VERSION_MAJOR}::Widgets ${VTK_LIBRARIES})
+target_link_libraries(soot_dem_gui PUBLIC Qt${QT_VERSION_MAJOR}::Widgets ${VTK_LIBRARIES} CGAL::CGAL)
 
 if (${MSVC})
     set_property(TARGET soot_dem_gui PROPERTY

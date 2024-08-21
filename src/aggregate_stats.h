@@ -17,6 +17,8 @@ struct AggregateGraph {
 
 using GraphEdge = std::pair<int, int>;
 
+double compute_convexity(std::vector<Eigen::Vector3d> const & x, double r_part);
+
 std::vector<AggregateGraph> find_aggregates(std::vector<Eigen::Vector3d> const & x, double r_part, double d_crit);
 
 double coordination_number(std::vector<Eigen::Vector3d> const & x, double r_part, double d_crit);

@@ -54,11 +54,13 @@ void GeometryThread::run() {
 
         double rg = r_gyration(sub_aggregate);
         double coord = coordination_number(sub_aggregate, this->r_part, this->r_part / 10.0);
+        double convexity = compute_convexity(sub_aggregate, this->r_part);
 
         ss << "Aggregate " << i + 1 << "\n";
         ss << "Size: " << nodeIndices.size() << "\n";
         ss << "Radius of gyration: " << rg << "\n";
         ss << "Coordination number: " << coord << "\n";
+        ss << "Convexity: " << convexity << "\n";
 
         ss << "\n";
     }
