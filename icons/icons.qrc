@@ -8,5 +8,6 @@
     <file>open.svg</file>
     <file>new.svg</file>
     <file>question.svg</file>
+    <file>geometry.svg</file>
   </qresource>
 </RCC>

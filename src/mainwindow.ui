@@ -224,11 +224,30 @@
          </item>
          <item>
           <widget class="QToolButton" name="geometryAnalysisButton">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="toolTip">
+            <string>Run geometry analysis</string>
+           </property>
+           <property name="statusTip">
+            <string>Run Geometry Analysis</string>
+           </property>
            <property name="text">
-            <string>Geometry analysis</string>
+            <string>...</string>
            </property>
            <property name="toolButtonStyle">
             <enum>Qt::ToolButtonStyle::ToolButtonIconOnly</enum>
+           </property>
+           <property name="icon">
+            <iconset resource="../icons/icons.qrc">
+             <normaloff>:/icons/geometry.svg</normaloff>:/icons/geometry.svg</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
            </property>
           </widget>
          </item>
