@@ -34,3 +34,5 @@ dist/*/**/run/
 developer_log.json
 # Temporary files created by Qt Designer from flathub
 .xdp-qt_temp.*
+# MacOS directory metadata
+.DS_Store
