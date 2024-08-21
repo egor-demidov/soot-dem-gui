@@ -139,12 +139,12 @@ bool iterate_types_w_heap(MainWindow * main_window, parameter_heap_t const & par
 }
 
 template<typename Head>
-parameter_heap_t get_parameters_from_input_current_simulation_type(MainWindow * main_window) {
+std::pair<parameter_heap_t, bool> get_parameters_from_input_current_simulation_type(MainWindow * main_window) {
     return main_window->get_parameters_from_input<Head>();
 }
 
 template<typename Head, typename Mid, typename... Tail>
-parameter_heap_t get_parameters_from_input_current_simulation_type(MainWindow * main_window) {
+std::pair<parameter_heap_t, bool> get_parameters_from_input_current_simulation_type(MainWindow * main_window) {
     if (main_window->ui->simulationTypeSelector->currentData().toInt() == Head::combo_id)
         return main_window->get_parameters_from_input<Head>();
     return get_parameters_from_input_current_simulation_type<Mid, Tail...>(main_window);
@@ -400,17 +400,19 @@ void MainWindow::reset_parameter_table() {
 }
 
 template<typename SimulationType>
-parameter_heap_t MainWindow::get_parameters_from_input() const {
+std::pair<parameter_heap_t, bool> MainWindow::get_parameters_from_input() const {
+    bool result = true;
     parameter_heap_t parameter_heap;
     for (int i = 0; i < SimulationType::N_PARAMETERS; i ++) {
         QString value = parameter_table_fields[i*4+2].text();
         auto [id, type, description] = SimulationType::PARAMETERS[i];
+        bool ok = true;
         switch (type) {
             case INTEGER:
-                parameter_heap[id] = std::make_pair(INTEGER, ParameterValue{.integer_value = value.toInt()});
+                parameter_heap[id] = std::make_pair(INTEGER, ParameterValue{.integer_value = value.toInt(&ok)});
                 break;
             case REAL:
-                parameter_heap[id] = std::make_pair(REAL, ParameterValue{.real_value = value.toDouble()});
+                parameter_heap[id] = std::make_pair(REAL, ParameterValue{.real_value = value.toDouble(&ok)});
                 break;
             case STRING:
                 parameter_heap[id] = std::make_pair(STRING, ParameterValue{.string_value = value.toStdString()});
@@ -418,14 +420,19 @@ parameter_heap_t MainWindow::get_parameters_from_input() const {
             case PATH:
                 parameter_heap[id] = std::make_pair(PATH, ParameterValue{.path_value = std::filesystem::path(value.toStdString())});
         }
+        if (!ok) result = false;
     }
-    return parameter_heap;
+    return {parameter_heap, result};
 }
 
 template<typename SimulationType>
 bool MainWindow::initialize_simulation() {
     lock_parameters();
-    parameter_heap_t parameter_heap = get_parameters_from_input<SimulationType>();
+    auto [parameter_heap, result] = get_parameters_from_input<SimulationType>();
+
+    // Error parsing ints or doubles
+    if (!result)
+        return false;
 
     std::stringstream ss;
     std::vector<Eigen::Vector3d> x0_buffer, neck_positions_buffer, neck_orientations_buffer;
@@ -539,7 +546,12 @@ bool MainWindow::save_as() {
 }
 
 bool MainWindow::save() {
-    parameter_heap_t parameters = get_parameters_from_input_current_simulation_type<ENABLED_SIMULATIONS>(this);
+    auto [parameters, result] = get_parameters_from_input_current_simulation_type<ENABLED_SIMULATIONS>(this);
+
+    // Error parsing ints / doubles
+    if (!result)
+        return false;
+
     const char * config_signature = get_current_simulation_type_config_signature<ENABLED_SIMULATIONS>(this);
 
     try {
@@ -575,6 +587,10 @@ bool MainWindow::save_as_button_handler() {
     if (result)
         configuration_state = SAVED;
     update_configuration_state();
+
+    if (!result)
+        QMessageBox::warning(this, "Save error", "Unable to save the configuration. Check parameters and destination path and retry.");
+
     return result;
 }
 
@@ -588,6 +604,9 @@ bool MainWindow::save_button_handler() {
     if (result)
         configuration_state = SAVED;
     update_configuration_state();
+
+    if (!result)
+        QMessageBox::warning(this, "Save error", "Unable to save the configuration. Check parameters and destination path and retry.");
 
     return result;
 }
