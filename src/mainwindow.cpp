@@ -52,6 +52,11 @@
 
 #define ENABLED_SIMULATIONS RestructuringFixedFractionSimulation, AggregationSimulation//, AggregateDepositionSimulation
 
+#define SET_ENABLED(__OP__, __STATE__) __OP1__->setEnabled(__STATE__)
+#define SET_ENABLED_2(__OP1__, __OP2__, __STATE__) \
+    __OP1__->setEnabled(__STATE__);                \
+    __OP2__->setEnabled(__STATE__)
+
 template<typename T>
 struct init_combo_box_functor {
     static bool apply(MainWindow * main_window) {
@@ -743,10 +748,10 @@ void MainWindow::update_tool_buttons() {
             ui->resetButton->setEnabled(true);
             ui->simulationTypeSelector->setEnabled(false);
 
-            ui->actionNew->setEnabled(true);
-            ui->actionSave->setEnabled(true);
-            ui->actionSaveAs->setEnabled(true);
-            ui->actionOpen->setEnabled(true);
+            ui->actionNew->setEnabled(false);
+            ui->actionSave->setEnabled(false);
+            ui->actionSaveAs->setEnabled(false);
+            ui->actionOpen->setEnabled(false);
             ui->actionAdvance_One_Step->setEnabled(true);
             ui->actionAdvance_Continuously->setEnabled(true);
             ui->actionPause->setEnabled(false);
@@ -774,8 +779,8 @@ void MainWindow::update_tool_buttons() {
             break;
         }
         case RESET: {
-            ui->newButton->setEnabled(true);
-            ui->saveButton->setEnabled(true);
+            SET_ENABLED_2(ui->newButton, ui->actionNew, true);
+            SET_ENABLED_2(ui->saveButton, ui->actionSave, true);
             ui->openButton->setEnabled(true);
             ui->playButton->setEnabled(true);
             ui->playAllButton->setEnabled(true);
@@ -783,8 +788,6 @@ void MainWindow::update_tool_buttons() {
             ui->resetButton->setEnabled(false);
             ui->simulationTypeSelector->setEnabled(true);
 
-            ui->actionNew->setEnabled(true);
-            ui->actionSave->setEnabled(true);
             ui->actionSaveAs->setEnabled(true);
             ui->actionOpen->setEnabled(true);
             ui->actionAdvance_One_Step->setEnabled(true);
