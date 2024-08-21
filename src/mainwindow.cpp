@@ -52,10 +52,16 @@
 
 #define ENABLED_SIMULATIONS RestructuringFixedFractionSimulation, AggregationSimulation//, AggregateDepositionSimulation
 
-#define SET_ENABLED(__OP__, __STATE__) __OP1__->setEnabled(__STATE__)
-#define SET_ENABLED_2(__OP1__, __OP2__, __STATE__) \
-    __OP1__->setEnabled(__STATE__);                \
-    __OP2__->setEnabled(__STATE__)
+template<typename T1, typename T2>
+inline void set_enabled(T1 * obj1, T2 * obj2, bool state) {
+    obj1->setEnabled(state);
+    obj2->setEnabled(state);
+}
+
+template<typename T>
+inline void set_enabled(T * obj, bool state) {
+    obj->setEnabled(state);
+}
 
 template<typename T>
 struct init_combo_box_functor {
@@ -670,45 +676,45 @@ MainWindow::~MainWindow() = default;
 void MainWindow::update_configuration_state() {
     switch (configuration_state) {
         case NONE: {
-            ui->saveButton->setEnabled(true);
-            ui->newButton->setEnabled(false);
+            // Paired buttons
+            set_enabled(ui->saveButton, ui->actionSave, true);
+            set_enabled(ui->newButton, ui->actionNew, false);
 
-            ui->actionSave->setEnabled(true);
-            ui->actionSaveAs->setEnabled(true);
-            ui->actionNew->setEnabled(false);
+            // Single buttons
+            set_enabled(ui->actionSaveAs, true);
 
             setWindowTitle("soot-dem-gui by Egor Demidov");
             break;
         }
         case UNSAVED: {
-            ui->saveButton->setEnabled(true);
-            ui->newButton->setEnabled(true);
+            // Paired buttons
+            set_enabled(ui->saveButton, ui->actionSave, true);
+            set_enabled(ui->newButton, ui->actionNew, true);
 
-            ui->actionSave->setEnabled(true);
-            ui->actionSaveAs->setEnabled(true);
-            ui->actionNew->setEnabled(true);
+            // Single buttons
+            set_enabled(ui->actionSaveAs, true);
 
             setWindowTitle("soot-dem-gui by Egor Demidov - project location not chosen");
             break;
         }
         case PATH_CHOSEN: {
-            ui->saveButton->setEnabled(true);
-            ui->newButton->setEnabled(true);
+            // Paired buttons
+            set_enabled(ui->saveButton, ui->actionSave, true);
+            set_enabled(ui->newButton, ui->actionNew, true);
 
-            ui->actionSave->setEnabled(true);
-            ui->actionSaveAs->setEnabled(true);
-            ui->actionNew->setEnabled(true);
+            // Single buttons
+            set_enabled(ui->actionSaveAs, true);
 
             setWindowTitle("soot-dem-gui by Egor Demidov - " + configurations_file_path + " - changes not saved");
             break;
         }
         case SAVED: {
-            ui->saveButton->setEnabled(false);
-            ui->newButton->setEnabled(true);
+            // Paired buttons
+            set_enabled(ui->saveButton, ui->actionSave, false);
+            set_enabled(ui->newButton, ui->actionNew, true);
 
-            ui->actionSave->setEnabled(false);
-            ui->actionSaveAs->setEnabled(true);
-            ui->actionNew->setEnabled(true);
+            // Single buttons
+            set_enabled(ui->actionSaveAs, true);
 
             setWindowTitle("soot-dem-gui by Egor Demidov - " + configurations_file_path);
         }
@@ -719,81 +725,67 @@ void MainWindow::update_tool_buttons() {
     switch (simulation_state) {
         case RUN_ONE:
         case PAUSE_REQUESTED: {
-            ui->newButton->setEnabled(false);
-            ui->saveButton->setEnabled(false);
-            ui->openButton->setEnabled(false);
-            ui->playButton->setEnabled(false);
-            ui->playAllButton->setEnabled(false);
-            ui->pauseButton->setEnabled(false);
-            ui->resetButton->setEnabled(false);
-            ui->simulationTypeSelector->setEnabled(false);
+            // Paired buttons
+            set_enabled(ui->newButton, ui->actionNew, false);
+            set_enabled(ui->saveButton, ui->actionSave, false);
+            set_enabled(ui->openButton, ui->actionOpen, false);
+            set_enabled(ui->playButton, ui->actionAdvance_One_Step, false);
+            set_enabled(ui->playAllButton, ui->actionAdvance_Continuously, false);
+            set_enabled(ui->pauseButton, ui->actionPause, false);
+            set_enabled(ui->resetButton, ui->actionStop, false);
 
-            ui->actionNew->setEnabled(false);
-            ui->actionSave->setEnabled(false);
-            ui->actionSaveAs->setEnabled(false);
-            ui->actionOpen->setEnabled(false);
-            ui->actionAdvance_One_Step->setEnabled(false);
-            ui->actionAdvance_Continuously->setEnabled(false);
-            ui->actionPause->setEnabled(false);
-            ui->actionStop->setEnabled(false);
+            // Single buttons
+            set_enabled(ui->actionSaveAs, false);
+            set_enabled(ui->simulationTypeSelector, false);
+
             break;
         }
         case PAUSE: {
-            ui->newButton->setEnabled(false);
-            ui->saveButton->setEnabled(false);
-            ui->openButton->setEnabled(false);
-            ui->playButton->setEnabled(true);
-            ui->playAllButton->setEnabled(true);
-            ui->pauseButton->setEnabled(false);
-            ui->resetButton->setEnabled(true);
-            ui->simulationTypeSelector->setEnabled(false);
+            // Paired buttons
+            set_enabled(ui->newButton, ui->actionNew, false);
+            set_enabled(ui->saveButton, ui->actionSave, false);
+            set_enabled(ui->openButton, ui->actionOpen, false);
+            set_enabled(ui->playButton, ui->actionAdvance_One_Step, true);
+            set_enabled(ui->playAllButton, ui->actionAdvance_Continuously, true);
+            set_enabled(ui->pauseButton, ui->actionPause, false);
+            set_enabled(ui->resetButton, ui->actionStop, true);
 
-            ui->actionNew->setEnabled(false);
-            ui->actionSave->setEnabled(false);
-            ui->actionSaveAs->setEnabled(false);
-            ui->actionOpen->setEnabled(false);
-            ui->actionAdvance_One_Step->setEnabled(true);
-            ui->actionAdvance_Continuously->setEnabled(true);
-            ui->actionPause->setEnabled(false);
-            ui->actionStop->setEnabled(true);
+            // Single buttons
+            set_enabled(ui->actionSaveAs, false);
+            set_enabled(ui->simulationTypeSelector, false);
+
             break;
         }
         case RUN_CONTINUOUS: {
-            ui->newButton->setEnabled(false);
-            ui->saveButton->setEnabled(false);
-            ui->openButton->setEnabled(false);
-            ui->playButton->setEnabled(false);
-            ui->playAllButton->setEnabled(false);
-            ui->pauseButton->setEnabled(true);
-            ui->resetButton->setEnabled(false);
-            ui->simulationTypeSelector->setEnabled(false);
+            // Paired buttons
+            set_enabled(ui->newButton, ui->actionNew, false);
+            set_enabled(ui->saveButton, ui->actionSave, false);
+            set_enabled(ui->openButton, ui->actionOpen, false);
+            set_enabled(ui->playButton, ui->actionAdvance_One_Step, false);
+            set_enabled(ui->playAllButton, ui->actionAdvance_Continuously, false);
+            set_enabled(ui->pauseButton, ui->actionPause, true);
+            set_enabled(ui->resetButton, ui->actionStop, false);
 
-            ui->actionNew->setEnabled(false);
-            ui->actionSave->setEnabled(false);
-            ui->actionSaveAs->setEnabled(false);
-            ui->actionOpen->setEnabled(false);
-            ui->actionAdvance_One_Step->setEnabled(false);
-            ui->actionAdvance_Continuously->setEnabled(false);
-            ui->actionPause->setEnabled(true);
-            ui->actionStop->setEnabled(false);
+            // Single buttons
+            set_enabled(ui->actionSaveAs, false);
+            set_enabled(ui->simulationTypeSelector, false);
+
             break;
         }
         case RESET: {
-            SET_ENABLED_2(ui->newButton, ui->actionNew, true);
-            SET_ENABLED_2(ui->saveButton, ui->actionSave, true);
-            ui->openButton->setEnabled(true);
-            ui->playButton->setEnabled(true);
-            ui->playAllButton->setEnabled(true);
-            ui->pauseButton->setEnabled(false);
-            ui->resetButton->setEnabled(false);
-            ui->simulationTypeSelector->setEnabled(true);
+            // Paired buttons
+            set_enabled(ui->newButton, ui->actionNew, true);
+            set_enabled(ui->saveButton, ui->actionSave, true);
+            set_enabled(ui->openButton, ui->actionOpen, true);
+            set_enabled(ui->playButton, ui->actionAdvance_One_Step, true);
+            set_enabled(ui->playAllButton, ui->actionAdvance_Continuously, true);
+            set_enabled(ui->pauseButton, ui->actionPause, false);
+            set_enabled(ui->resetButton, ui->actionStop, false);
 
-            ui->actionSaveAs->setEnabled(true);
-            ui->actionOpen->setEnabled(true);
-            ui->actionAdvance_One_Step->setEnabled(true);
-            ui->actionAdvance_Continuously->setEnabled(true);
-            ui->actionPause->setEnabled(false);
-            ui->actionStop->setEnabled(false);
+            // Single buttons
+            set_enabled(ui->actionSaveAs, true);
+            set_enabled(ui->simulationTypeSelector, true);
+
             update_configuration_state();
         }
     }
