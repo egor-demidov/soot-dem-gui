@@ -207,6 +207,7 @@ std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3
                 k_t_bond,
                 k_r_bond,
                 k_o_bond,
+                e_crit,
                 r_part
         );
 

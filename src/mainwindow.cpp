@@ -940,6 +940,12 @@ void MainWindow::update_preview(std::vector<Eigen::Vector3d> const & x,
                                 std::vector<Eigen::Vector3d> const & neck_orientations) {
 
     // Delete necks that have been broken
+
+    while (vtk_necks_representation.size() > neck_positions.size()) {
+        vtk_renderer->RemoveActor(std::get<1>(vtk_necks_representation.back()));
+        vtk_necks_representation.pop_back();
+    }
+
 //    for (long i = vtk_necks_representation.size() - 1; i > neck_positions.size(); i --) {
 //        vtk_renderer->RemoveActor(std::get<1>(vtk_necks_representation[i]));
 //        vtk_necks_representation.pop_back();

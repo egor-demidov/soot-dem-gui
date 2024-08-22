@@ -72,45 +72,45 @@ public:
     static constexpr unsigned int combo_id = 3;
 
     // TODO: remove after debugging
-    static constexpr const char * default_values[]{
-            "1e-19",
-            "1e-9",
-            "5e-15",
-            "5e-19",
-            "5.6e-08",
-            "1.78571e+08",
-            "1e-9",
-            "5e-09",
-            "1.25e-06",
-            "2.5e-10",
-            "6.25e-08",
-            "2.5e-10",
-            "6.25e-08",
-            "1e-09",
-            "2.5e-07",
-            "1e-09",
-            "10000",
-            "1e+06",
-            "10000",
-            "1e+07",
-            "10000",
-            "1e+07",
-            "10000",
-            "1e+07",
-            "0.1",
-            "0.1",
-            "1",
-            "1",
-            "1",
-            "1",
-            "1.4e-08",
-            "7e-08",
-            "1700",
-            "10000",
-            "20",
-            "mackowski",
-            "aggregate.txt",
-    };
+//    static constexpr const char * default_values[]{
+//            "1e-19",
+//            "1e-9",
+//            "5e-15",
+//            "5e-19",
+//            "5.6e-08",
+//            "1.78571e+08",
+//            "1e-9",
+//            "5e-09",
+//            "1.25e-06",
+//            "2.5e-10",
+//            "6.25e-08",
+//            "2.5e-10",
+//            "6.25e-08",
+//            "1e-09",
+//            "2.5e-07",
+//            "1e-09",
+//            "10000",
+//            "1e+06",
+//            "10000",
+//            "1e+07",
+//            "10000",
+//            "1e+07",
+//            "10000",
+//            "1e+07",
+//            "0.1",
+//            "0.1",
+//            "1",
+//            "1",
+//            "1",
+//            "1",
+//            "1.4e-08",
+//            "7e-08",
+//            "1700",
+//            "10000",
+//            "20",
+//            "mackowski",
+//            "aggregate.txt",
+//    };
 
     static constexpr const char * DESCRIPTION = "An aggregate is loaded\n"
                                                 "and necks are inserted between\n"
@@ -162,7 +162,7 @@ public:
             {"aggregate_path", PATH, "Path to the aggregate file"}
     };
     static constexpr size_t N_PARAMETERS = sizeof(PARAMETERS) / sizeof(PARAMETERS[0]);
-//    static constexpr const char * default_values[N_PARAMETERS]{0};
+    static constexpr const char * default_values[N_PARAMETERS]{0};
 
     std::tuple<std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>> get_neck_information() const;
 
