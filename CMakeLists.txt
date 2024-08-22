@@ -56,7 +56,7 @@ set(LIBRARIES_LIST Qt${QT_VERSION_MAJOR}::Widgets ${VTK_LIBRARIES})
 
 option(USE_CGAL "Use CGAL library" ON)
 if (USE_CGAL)
-    find_package(CGAL REQUIRED)
+    find_package(CGAL)
     if (NOT CGAL_FOUND)
         set(USE_CGAL OFF)
     endif ()
