@@ -52,7 +52,20 @@ if(NOT DEFINED VTK_QT_VERSION)
     set(VTK_QT_VERSION 5)
 endif()
 
-find_package(CGAL REQUIRED)
+set(LIBRARIES_LIST Qt${QT_VERSION_MAJOR}::Widgets ${VTK_LIBRARIES})
+
+option(USE_CGAL "Use CGAL library" ON)
+if (USE_CGAL)
+    find_package(CGAL REQUIRED)
+    if (NOT CGAL_FOUND)
+        set(USE_CGAL OFF)
+    endif ()
+endif()
+
+if (USE_CGAL)
+    add_compile_definitions(USE_CGAL)
+    set(LIBRARIES_LIST CGAL::CGAL ${LIBRARIES_LIST})
+endif ()
 
 set(PROJECT_SOURCES
         src/main.cpp
@@ -106,8 +119,6 @@ else ()
     set(CMAKE_CXX_FLAGS "-O3 -flto=auto -fopenmp ${CMAKE_CXX_FLAGS}")
 endif ()
 
-#include_directories(dummy)
-
 set(MISC_SOURCES
     deps/tinyxml2/tinyxml2.cpp
     deps/soot-dem/src/aggregate_stats.cpp
@@ -128,7 +139,7 @@ add_executable(soot_dem_gui MACOSX_BUNDLE ${MACOS_APP_ICON}
     ${PROJECT_SOURCES} ${MISC_SOURCES}
 )
 
-target_link_libraries(soot_dem_gui PUBLIC Qt${QT_VERSION_MAJOR}::Widgets ${VTK_LIBRARIES} CGAL::CGAL)
+target_link_libraries(soot_dem_gui PUBLIC ${LIBRARIES_LIST})
 
 if (${MSVC})
     set_property(TARGET soot_dem_gui PROPERTY

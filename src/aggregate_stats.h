@@ -17,7 +17,9 @@ struct AggregateGraph {
 
 using GraphEdge = std::pair<int, int>;
 
+#ifdef USE_CGAL
 double compute_convexity(std::vector<Eigen::Vector3d> const & x, double r_part);
+#endif //USE_CGAL
 
 std::vector<AggregateGraph> find_aggregates(std::vector<Eigen::Vector3d> const & x, double r_part, double d_crit);
 
