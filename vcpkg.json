@@ -11,6 +11,9 @@
       "features": [
         "qt"
       ]
+    },
+    {
+      "name": "cgal"
     }
   ]
 }
