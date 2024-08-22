@@ -86,6 +86,8 @@ set(PROJECT_SOURCES
         src/aggregation.cpp
         src/restructuring_fixed_fraction.cpp
         src/restructuring_fixed_fraction.h
+        src/restructuring_breaking.cpp
+        src/restructuring_breaking.h
         src/aggregate_deposition.cpp
         src/aggregate_deposition.h
         src/simulation.h

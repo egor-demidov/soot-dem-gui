@@ -46,12 +46,13 @@
 #include "geometrydialog.h"
 
 #include "restructuring_fixed_fraction.h"
+#include "restructuring_breaking.h"
 #include "aggregation.h"
 #include "aggregate_deposition.h"
 
 #include "config.h"
 
-#define ENABLED_SIMULATIONS RestructuringFixedFractionSimulation, AggregationSimulation//, AggregateDepositionSimulation
+#define ENABLED_SIMULATIONS RestructuringFixedFractionSimulation, RestructuringBreakingSimulation, AggregationSimulation//, AggregateDepositionSimulation
 
 template<typename T1, typename T2>
 inline void set_enabled(T1 * obj1, T2 * obj2, bool state) {
