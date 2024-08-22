@@ -12,11 +12,12 @@ repository. See below for instructions on building from source.
 
 System dependencies:
 
-- CMake (3.21 or later)
 - git
+- CMake (3.21 or later)
 - Ninja build
 - Qt Widgets
 - VTK built with Qt support
+- CGAL
 - C++ compiler with C++23 and OpenMP support
 
 The dependencies can be installed with your system's package manager or vcpkg.
