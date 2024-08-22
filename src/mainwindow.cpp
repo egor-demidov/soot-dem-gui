@@ -43,6 +43,7 @@
 #include <vtkPolyData.h>
 
 #include "aboutdialog.h"
+#include "geometrydialog.h"
 
 #include "restructuring_fixed_fraction.h"
 #include "aggregation.h"
@@ -202,6 +203,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionSaveAs, &QAction::triggered, this, &MainWindow::save_as_button_handler);
     // About button
     connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::about_dialog_handler);
+    // Geometry analysis button
+    connect(ui->geometryAnalysisButton, &QAbstractButton::clicked, this, &MainWindow::geometry_dialog_handler);
+    connect(ui->actionGeometryAnalysis, &QAction::triggered, this, &MainWindow::geometry_dialog_handler);
     // Close window button
     connect(ui->actionClose_window, &QAction::triggered, this, &MainWindow::close_handler);
     // About simulation button
@@ -436,13 +440,20 @@ bool MainWindow::initialize_simulation() {
     if (!result)
         return false;
 
+    auto r_part_pos = parameter_heap.find("r_part");
+    if (r_part_pos == parameter_heap.end() || r_part_pos->second.first != REAL) {
+        std::cerr << "Every simulation must contain the r_part parameter of type real" << std::endl;
+        return false;
+    }
+    this->r_part = r_part_pos->second.second.real_value;
+
     std::stringstream ss;
-    std::vector<Eigen::Vector3d> x0_buffer, neck_positions_buffer, neck_orientations_buffer;
+    std::vector<Eigen::Vector3d> neck_positions_buffer, neck_orientations_buffer;
 
     simulation = std::make_shared<SimulationType>(parameter_heap, std::filesystem::path(configurations_file_path.toStdString()).parent_path());
 
     if (!simulation->initialize(ss,
-                                x0_buffer,
+                                this->particle_positions,
                                 neck_positions_buffer,
                                 neck_orientations_buffer)) {
 
@@ -455,7 +466,7 @@ bool MainWindow::initialize_simulation() {
     compute_thread.initialize(simulation);
 
     // TODO: replace constant r_part with parameter
-    initialize_preview(x0_buffer, neck_positions_buffer, neck_orientations_buffer, 14e-9);
+    initialize_preview(this->particle_positions, neck_positions_buffer, neck_orientations_buffer);
 
     return true;
 }
@@ -605,14 +616,12 @@ void MainWindow::about_dialog_handler() {
     AboutDialog aboutDialog(this);
     aboutDialog.show();
     aboutDialog.exec();
-    /*QMessageBox::about(this, "About soot-dem-gui",
-                                        "A GUI for soot-dem project:\nhttps://github.com/egor-demidov/soot-dem\n\n"
-                                        "Contact model description available at:\nhttps://doi.org/10.48550/arXiv.2407.14254\n\n"
-                                        "Source code available at:\nhttps://github.com/egor-demidov/soot-dem-gui\n\n"
-                                        "Feedback and questions to:\nmail@edemidov.com\n\n"
-                                        "Project funded by:\nU.S. N.S.F. Award #AGS-2222104\n\n"
-                                       "Copyright (c) 2024, Egor Demidov\n\n"
-                                       "GNU GPL License V3");*/
+}
+
+void MainWindow::geometry_dialog_handler() {
+    GeometryDialog geometryDialog(this->particle_positions, this->r_part, this);
+    geometryDialog.show();
+    geometryDialog.exec();
 }
 
 bool MainWindow::save_as_button_handler() {
@@ -695,6 +704,7 @@ void MainWindow::reset_button_handler() {
     if (reply == QMessageBox::Cancel)
         return;
 
+    this->particle_positions.clear();
     simulation_state = RESET;
     compute_thread.do_terminate();
     reset_preview();
@@ -785,6 +795,7 @@ void MainWindow::update_tool_buttons() {
             set_enabled(ui->playAllButton, ui->actionAdvance_Continuously, false);
             set_enabled(ui->pauseButton, ui->actionPause, false);
             set_enabled(ui->resetButton, ui->actionStop, false);
+            set_enabled(ui->geometryAnalysisButton, ui->actionGeometryAnalysis, false);
 
             // Single buttons
             set_enabled(ui->actionSaveAs, false);
@@ -801,6 +812,7 @@ void MainWindow::update_tool_buttons() {
             set_enabled(ui->playAllButton, ui->actionAdvance_Continuously, true);
             set_enabled(ui->pauseButton, ui->actionPause, false);
             set_enabled(ui->resetButton, ui->actionStop, true);
+            set_enabled(ui->geometryAnalysisButton, ui->actionGeometryAnalysis, true);
 
             // Single buttons
             set_enabled(ui->actionSaveAs, false);
@@ -817,6 +829,7 @@ void MainWindow::update_tool_buttons() {
             set_enabled(ui->playAllButton, ui->actionAdvance_Continuously, false);
             set_enabled(ui->pauseButton, ui->actionPause, true);
             set_enabled(ui->resetButton, ui->actionStop, false);
+            set_enabled(ui->geometryAnalysisButton, ui->actionGeometryAnalysis, false);
 
             // Single buttons
             set_enabled(ui->actionSaveAs, false);
@@ -833,6 +846,7 @@ void MainWindow::update_tool_buttons() {
             set_enabled(ui->playAllButton, ui->actionAdvance_Continuously, true);
             set_enabled(ui->pauseButton, ui->actionPause, false);
             set_enabled(ui->resetButton, ui->actionStop, false);
+            set_enabled(ui->geometryAnalysisButton, ui->actionGeometryAnalysis, false);
 
             // Single buttons
             set_enabled(ui->actionSaveAs, true);
@@ -855,11 +869,13 @@ void MainWindow::compute_step_done(QString const & message,
         simulation_state = SimulationState::PAUSE;
         update_tool_buttons();
     }
+
+    this->particle_positions = std::vector<Eigen::Vector3d>(x.begin(), x.end());
+
     // TODO: replace hardcoded r_part with value from inputs
-    update_preview(std::vector<Eigen::Vector3d>(x.begin(), x.end()),
+    update_preview(this->particle_positions,
                    std::vector<Eigen::Vector3d>(neck_positions.begin(), neck_positions.end()),
-                   std::vector<Eigen::Vector3d>(neck_orientations.begin(), neck_orientations.end()),
-                   14.0e-9);
+                   std::vector<Eigen::Vector3d>(neck_orientations.begin(), neck_orientations.end()));
 }
 
 void MainWindow::pause_done() {
@@ -870,8 +886,7 @@ void MainWindow::pause_done() {
 void MainWindow::initialize_preview(
         std::vector<Eigen::Vector3d> const & x,
         std::vector<Eigen::Vector3d> const & neck_positions,
-        std::vector<Eigen::Vector3d> const & neck_orientations,
-        double r_part) {
+        std::vector<Eigen::Vector3d> const & neck_orientations) {
 
     // Initialize particle representations
     vtk_particles_representation.reserve(x.size());
@@ -921,8 +936,7 @@ void MainWindow::initialize_preview(
 // ASSUMING NECK COUNT CAN ONLY DECREASE
 void MainWindow::update_preview(std::vector<Eigen::Vector3d> const & x,
                                 std::vector<Eigen::Vector3d> const & neck_positions,
-                                std::vector<Eigen::Vector3d> const & neck_orientations,
-                                double r_part) {
+                                std::vector<Eigen::Vector3d> const & neck_orientations) {
 
     // Delete necks that have been broken
 //    for (long i = vtk_necks_representation.size() - 1; i > neck_positions.size(); i --) {

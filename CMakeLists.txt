@@ -60,8 +60,13 @@ set(PROJECT_SOURCES
         src/aboutdialog.ui
         src/aboutdialog.h
         src/aboutdialog.cpp
+        src/geometrydialog.ui
+        src/geometrydialog.h
+        src/geometrydialog.cpp
         src/compute_thread.h
         src/compute_thread.cpp
+        src/geometry_thread.h
+        src/geometry_thread.cpp
         src/aggregation.h
         src/aggregation.cpp
         src/restructuring_fixed_fraction.cpp
@@ -73,6 +78,8 @@ set(PROJECT_SOURCES
         src/config.h
         src/config.cpp
         src/exceptions.h
+        src/aggregate_stats.cpp
+        src/aggregate_stats.h
         fonts/fonts.qrc
         icons/icons.qrc
         icons/app.rc

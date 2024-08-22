@@ -72,6 +72,7 @@ private slots:
 
     void about_simulation_handler();
     void about_dialog_handler();
+    void geometry_dialog_handler();
     void pause_done();
     void reset_button_handler();
     void play_button_handler();
@@ -104,12 +105,10 @@ private:
     void initialize_preview(
             std::vector<Eigen::Vector3d> const & x,
             std::vector<Eigen::Vector3d> const & neck_positions,
-            std::vector<Eigen::Vector3d> const & neck_orientations,
-            double r_part);
+            std::vector<Eigen::Vector3d> const & neck_orientations);
     void update_preview(std::vector<Eigen::Vector3d> const & x,
                         std::vector<Eigen::Vector3d> const & neck_positions,
-                        std::vector<Eigen::Vector3d> const & neck_orientations,
-                        double r_part);
+                        std::vector<Eigen::Vector3d> const & neck_orientations);
     void reset_preview();
 
     enum SimulationState {
@@ -119,6 +118,9 @@ private:
     enum ConfigurationFileState {
         NONE, UNSAVED, PATH_CHOSEN, SAVED
     };
+
+    std::vector<Eigen::Vector3d> particle_positions; // Particle positions from the most recent dump
+    double r_part; // Particle radius read from config for this simulation
 
     bool watching_parameter_table = false;
 
