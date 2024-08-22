@@ -17,7 +17,7 @@ System dependencies:
 - Ninja build
 - Qt Widgets
 - VTK built with Qt support
-- CGAL
+- CGAL (optional, needed to calculate convexity in geometry analysis)
 - C++ compiler with C++23 and OpenMP support
 
 The dependencies can be installed with your system's package manager or vcpkg.
