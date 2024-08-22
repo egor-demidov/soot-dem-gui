@@ -132,8 +132,8 @@ std::vector<AggregateGraph> find_aggregates(std::vector<Eigen::Vector3d> const &
 
     // Find and add single-monomer aggregates
     for (size_t i = 0; i < x.size(); i ++) {
-        if (!node_in_edges(i, edges));
-        graphs.emplace_back(std::vector<int>{}, std::vector<int>{int(i)});
+        if (!node_in_edges(i, edges))
+            graphs.emplace_back(std::vector<int>{}, std::vector<int>{int(i)});
     }
 
     return graphs;
