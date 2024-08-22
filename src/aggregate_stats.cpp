@@ -15,15 +15,26 @@ typedef CGAL::Polyhedron_3<K> Polyhedron_3;
 typedef K::Point_3 Point_3;
 typedef CGAL::Surface_mesh<Point_3> Surface_mesh;
 
-double compute_convexity(std::vector<Eigen::Vector3d> const & x, double r_part) {
-    std::vector<Point_3> points(x.size());
 
-    for (int n = 0; n < x.size(); n ++) {
-        points[n] = {
-                x[n][0],
-                x[n][1],
-                x[n][2]
-        };
+static constexpr long N_PHI_PTS = 32;
+static constexpr long N_THETA_PTS = 32;
+
+double compute_convexity(std::vector<Eigen::Vector3d> const & x, double r_part) {
+    std::vector<Point_3> points;
+
+    for (long n = 0; n < x.size(); n ++) {
+        for (long i = 0; i < N_PHI_PTS; i ++) {
+            for (long j = 0; j < N_THETA_PTS; j ++) {
+                double phi = double(i) * M_PI / double(N_PHI_PTS);
+                double theta = double(j) * 2.0 * M_PI / double(N_THETA_PTS);
+
+                points.emplace_back(
+                        x[n][0] + r_part * sin(phi) * cos(theta),
+                        x[n][1] + r_part * sin(phi) * sin(theta),
+                        x[n][2] + r_part * cos(phi)
+                );
+            }
+        }
     }
 
     Polyhedron_3 poly;
@@ -74,6 +85,13 @@ void populate_node_indices(AggregateGraph & graph, std::vector<GraphEdge> const 
     }
 }
 
+bool node_in_edges(int index, std::vector<GraphEdge> edges) {
+    for (auto [i, j] : edges) {
+        if (index == i || index == j) return true;
+    }
+    return false;
+}
+
 std::vector<AggregateGraph> find_aggregates(std::vector<Eigen::Vector3d> const & x, double r_part, double d_crit) {
     // Build graphs of aggregates to write them out separately
 
@@ -110,6 +128,12 @@ std::vector<AggregateGraph> find_aggregates(std::vector<Eigen::Vector3d> const &
 
     for (auto & graph : graphs) {
         populate_node_indices(graph, edges);
+    }
+
+    // Find and add single-monomer aggregates
+    for (size_t i = 0; i < x.size(); i ++) {
+        if (!node_in_edges(i, edges));
+        graphs.emplace_back(std::vector<int>{}, std::vector<int>{int(i)});
     }
 
     return graphs;
