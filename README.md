@@ -45,6 +45,8 @@ If VTK and Qt are to be installed through vcpkg:
 cmake -G Ninja --preset=default .
 ```
 
+To build without CGAL, set `USE_CGAL` CMake cache variable to `Off` during configuration
+
 #### Step 3: build
 
 In the `build` directory, run:
