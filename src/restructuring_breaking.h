@@ -175,6 +175,7 @@ private:
     double mass, inertia, r_part, dt;
     double k_n_bond, k_t_bond, k_o_bond, k_r_bond, e_mean, e_stdev;
     std::vector<double> neck_strengths;
+    long n_necks_init;
 
     long dump_period, neighbor_update_period;
     size_t current_step = 0;

@@ -140,23 +140,23 @@ RestructuringBreakingSimulation::initialize(std::ostream &output_stream, std::ve
     seed_random_engine(rng_seed);
 
     // Count the number of necks
-    size_t n_necks = std::count(aggregate_model->get_bonded_contacts().begin(),
+    n_necks_init = std::count(aggregate_model->get_bonded_contacts().begin(),
                                 aggregate_model->get_bonded_contacts().end(), true) / 2;
 
     // Initialize neck strengths
-    neck_strengths.resize(n_necks);
+    neck_strengths.resize(n_necks_init);
     std::normal_distribution<double> normal_dist(e_mean, e_stdev);
-    for (int n = 0; n < n_necks; n ++) {
+    for (int n = 0; n < n_necks_init; n ++) {
         neck_strengths[n] = normal_dist(get_random_engine());
     }
 
-    output_stream << "Initialized " << n_necks << " necks" << std::endl;
+    output_stream << "Initialized " << n_necks_init << " necks" << std::endl;
 
     auto [neck_positions, neck_orientations] = get_neck_information();
     neck_positions_buffer = neck_positions;
     neck_orientations_buffer = neck_orientations;
 
-    output_stream << "Dump\tTime\tKE\tRMS_disp\tRMS_force";
+    output_stream << "Dump\tTime\tKE\tRMS_disp\tRMS_force\tfrac_necks";
 
     dump_particles(dump_directory.string(), current_step / dump_period, granular_system->get_x(),
                    granular_system->get_v(), granular_system->get_a(),
@@ -241,14 +241,17 @@ std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3
     rms_displacement = sqrt(rms_displacement / double(x_before_iter.size()));
     rms_force = sqrt(rms_force / double(x_before_iter.size()));
 
+    auto [neck_positions, neck_orientations] = get_neck_information();
+
     std::stringstream message_out;
     auto fmt = std::format(
-            "{}\t{:.1e}\t{:.2e}\t{:.2e}\t{:.2e}",   // format string
+            "{}\t{:.1e}\t{:.2e}\t{:.2e}\t{:.2e}\t{:.2f}",   // format string
             current_step / dump_period,  // dump number
             double(current_step) * dt,  // time
             compute_ke(granular_system->get_v(), granular_system->get_omega(), mass, inertia),  // total kinetic energy
             rms_displacement,   // rms displacement of particles from the last dump
-            rms_force   // rms force acting on particles
+            rms_force,   // rms force acting on particles
+            double(neck_positions.size()) / double(n_necks_init)    // necking fraction
     );
     message_out << fmt;
 
@@ -256,8 +259,6 @@ std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3
                    granular_system->get_v(), granular_system->get_a(),
                    granular_system->get_omega(), granular_system->get_alpha(), r_part);
     dump_necks(dump_directory.string(), current_step / dump_period, granular_system->get_x(), aggregate_model->get_bonded_contacts(), r_part);
-
-    auto [neck_positions, neck_orientations] = get_neck_information();
 
     return {message_out.str(), granular_system->get_x(), neck_positions, neck_orientations};
 }
