@@ -39,13 +39,15 @@ mkdir build
 cd build
 cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
 ```
+To build without CGAL, set `USE_CGAL` CMake cache variable to `Off` during configuration:
+```
+cmake -G Ninja -DUSE_CGAL=Off -DCMAKE_BUILD_TYPE=Release ..
+```
 
-If VTK and Qt are to be installed through vcpkg:
+If VTK, Qt, and CGAL are to be installed through vcpkg:
 ```shell
 cmake -G Ninja --preset=default .
 ```
-
-To build without CGAL, set `USE_CGAL` CMake cache variable to `Off` during configuration
 
 #### Step 3: build
 
