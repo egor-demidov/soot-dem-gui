@@ -6,7 +6,8 @@
     <let id="d_crit" type="real">1e-09</let>
     <let id="dt" type="real">5e-15</let>
     <let id="dump_period" type="integer">10000</let>
-    <let id="e_crit" type="real">1e-20</let>
+    <let id="e_mean" type="real">5e-19</let>
+    <let id="e_stdev" type="real">4e-19</let>
     <let id="f_coat_cutoff" type="real">5.6e-08</let>
     <let id="f_coat_drop_rate" type="real">1.78571e+08</let>
     <let id="f_coat_max" type="real">1e-09</let>
@@ -37,4 +38,5 @@
     <let id="r_part" type="real">1.4e-08</let>
     <let id="r_verlet" type="real">7e-08</let>
     <let id="rho" type="real">1700</let>
+    <let id="rng_seed" type="integer">0</let>
 </simulation>

@@ -16,6 +16,7 @@
 
 #include <iomanip>
 #include <format>
+#include <random>
 
 #include "restructuring_breaking.h"
 
@@ -67,12 +68,15 @@ RestructuringBreakingSimulation::initialize(std::ostream &output_stream, std::ve
     auto aggregate_type = get_string_parameter("aggregate_type");
     auto aggregate_path = get_path_parameter("aggregate_path");
 
+    auto rng_seed = get_integer_parameter("rng_seed");
+
     // Initialization of member variables
     k_t_bond = get_real_parameter("k_t_bond");
     k_r_bond = get_real_parameter("k_r_bond");
     k_o_bond = get_real_parameter("k_o_bond");
     k_n_bond = get_real_parameter("k_n_bond");
-    e_crit = get_real_parameter("e_crit");
+    e_mean = get_real_parameter("e_mean");
+    e_stdev = get_real_parameter("e_stdev");
 
     dt = get_real_parameter("dt");
     dump_period = get_integer_parameter("dump_period");
@@ -133,9 +137,18 @@ RestructuringBreakingSimulation::initialize(std::ostream &output_stream, std::ve
                                                           v0, theta0, omega0, 0.0, Eigen::Vector3d::Zero(), 0.0,
                                                           step_handler_instance, *binary_force_container, *unary_force_container);
 
+    seed_random_engine(rng_seed);
+
     // Count the number of necks
     size_t n_necks = std::count(aggregate_model->get_bonded_contacts().begin(),
                                 aggregate_model->get_bonded_contacts().end(), true) / 2;
+
+    // Initialize neck strengths
+    neck_strengths.resize(n_necks);
+    std::normal_distribution<double> normal_dist(e_mean, e_stdev);
+    for (int n = 0; n < n_necks; n ++) {
+        neck_strengths[n] = normal_dist(get_random_engine());
+    }
 
     output_stream << "Initialized " << n_necks << " necks" << std::endl;
 
@@ -207,7 +220,7 @@ std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3
                 k_t_bond,
                 k_r_bond,
                 k_o_bond,
-                e_crit,
+                neck_strengths,
                 r_part
         );
 

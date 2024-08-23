@@ -77,6 +77,7 @@ public:
 //            "1e-9",
 //            "5e-15",
 //            "5e-19",
+//            "2e-19",
 //            "5.6e-08",
 //            "1.78571e+08",
 //            "1e-9",
@@ -106,10 +107,11 @@ public:
 //            "1.4e-08",
 //            "7e-08",
 //            "1700",
+//            "0",
 //            "10000",
 //            "20",
-//            "mackowski",
-//            "aggregate.txt",
+//            "vtk",
+//            "aggregate.vtk",
 //    };
 
     static constexpr const char * DESCRIPTION = "An aggregate is loaded\n"
@@ -126,7 +128,8 @@ public:
             {"A", REAL, "Hamaker constant"},
             {"d_crit", REAL, "Critical separation for a contact"},
             {"dt", REAL, "Integration time step"},
-            {"e_crit", REAL, "Critical potential energy for neck breakage"},
+            {"e_mean", REAL, "Mean critical potential energy for neck breakage"},
+            {"e_stdev", REAL, "Standard deviation of critical potential energy"},
             {"f_coat_cutoff", REAL, "Capillary force cutoff distance"},
             {"f_coat_drop_rate", REAL, "Capillary force drop rate"},
             {"f_coat_max", REAL, "Capillary force maximum magnitude"},
@@ -156,6 +159,7 @@ public:
             {"r_part", REAL, "Primary particle radius"},
             {"r_verlet", REAL, "Verlet radius"},
             {"rho", REAL, "Density"},
+            {"rng_seed", INTEGER, "Random number generator seed"},
             {"dump_period", INTEGER, "Dump period"},
             {"neighbor_update_period", INTEGER, "Neighbor list update period"},
             {"aggregate_type", STRING, "vtk / flage / mackowski"},
@@ -169,7 +173,8 @@ public:
 
 private:
     double mass, inertia, r_part, dt;
-    double k_n_bond, k_t_bond, k_o_bond, k_r_bond, e_crit;
+    double k_n_bond, k_t_bond, k_o_bond, k_r_bond, e_mean, e_stdev;
+    std::vector<double> neck_strengths;
 
     long dump_period, neighbor_update_period;
     size_t current_step = 0;
