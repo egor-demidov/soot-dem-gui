@@ -89,7 +89,7 @@ void populate_node_indices(AggregateGraph & graph, std::vector<GraphEdge> const 
     }
 }
 
-bool node_in_edges(int index, std::vector<GraphEdge> edges) {
+bool node_in_edges(int index, std::vector<GraphEdge> const & edges) {
     for (auto [i, j] : edges) {
         if (index == i || index == j) return true;
     }
@@ -136,8 +136,11 @@ std::vector<AggregateGraph> find_aggregates(std::vector<Eigen::Vector3d> const &
 
     // Find and add single-monomer aggregates
     for (size_t i = 0; i < x.size(); i ++) {
-        if (!node_in_edges(i, edges))
-            graphs.emplace_back(std::vector<int>{}, std::vector<int>{int(i)});
+        if (!node_in_edges(i, edges)) {
+            std::vector<int> edgeIndices, nodeIndices = {int(i)};
+            AggregateGraph graph {edgeIndices, nodeIndices};
+            graphs.emplace_back(graph);
+        }
     }
 
     return graphs;
