@@ -466,7 +466,6 @@ bool MainWindow::initialize_simulation() {
 
     compute_thread.initialize(simulation);
 
-    // TODO: replace constant r_part with parameter
     initialize_preview(this->particle_positions, neck_positions_buffer, neck_orientations_buffer);
 
     return true;
@@ -873,7 +872,6 @@ void MainWindow::compute_step_done(QString const & message,
 
     this->particle_positions = std::vector<Eigen::Vector3d>(x.begin(), x.end());
 
-    // TODO: replace hardcoded r_part with value from inputs
     update_preview(this->particle_positions,
                    std::vector<Eigen::Vector3d>(neck_positions.begin(), neck_positions.end()),
                    std::vector<Eigen::Vector3d>(neck_orientations.begin(), neck_orientations.end()));
@@ -945,11 +943,6 @@ void MainWindow::update_preview(std::vector<Eigen::Vector3d> const & x,
         vtk_renderer->RemoveActor(std::get<1>(vtk_necks_representation.back()));
         vtk_necks_representation.pop_back();
     }
-
-//    for (long i = vtk_necks_representation.size() - 1; i > neck_positions.size(); i --) {
-//        vtk_renderer->RemoveActor(std::get<1>(vtk_necks_representation[i]));
-//        vtk_necks_representation.pop_back();
-//    }
 
     for (size_t i = 0; i < x.size(); i ++) {
         vtk_particles_representation[i].second->SetPosition(x[i][0] / r_part, x[i][1] / r_part, x[i][2] / r_part);
