@@ -15,7 +15,7 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <iomanip>
-#include <format>
+#include "format_wrapper.h"
 
 #include "restructuring_fixed_fraction.h"
 
@@ -226,7 +226,7 @@ std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3
     rms_force = sqrt(rms_force / double(x_before_iter.size()));
 
     std::stringstream message_out;
-    auto fmt = std::format(
+    auto fmt = format_string(
             "{}\t{:.1e}\t{:.2e}\t{:.2e}\t{:.2e}",   // format string
             current_step / dump_period,  // dump number
             double(current_step) * dt,  // time

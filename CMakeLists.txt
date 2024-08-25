@@ -67,6 +67,20 @@ if (USE_CGAL)
     set(LIBRARIES_LIST CGAL::CGAL ${LIBRARIES_LIST})
 endif ()
 
+option(USE_FMT "Use fmt library" OFF)
+if (USE_FMT)
+    find_package(fmt)
+    if (NOT fmt_FOUND)
+        message("Could not find fmt, falling back to std::format")
+        set(USE_FMT OFF)
+    endif()
+endif()
+
+if (USE_FMT)
+    add_compile_definitions(USE_FMT)
+    set(LIBRARIES_LIST fmt::fmt ${LIBRARIES_LIST})
+endif()
+
 set(PROJECT_SOURCES
         src/main.cpp
         src/mainwindow.cpp
@@ -97,6 +111,7 @@ set(PROJECT_SOURCES
         src/exceptions.h
         src/aggregate_stats.cpp
         src/aggregate_stats.h
+        src/format_wrapper.h
         fonts/fonts.qrc
         icons/icons.qrc
         icons/app.rc
