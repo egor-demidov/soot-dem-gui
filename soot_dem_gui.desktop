@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=soot_dem_gui
+Exec=soot_dem_gui %F
+Icon=app
+Comment=Software for soot aggregate mechanics simulations
+Categories=Science
+Terminal=false
