@@ -104,6 +104,8 @@ set(PROJECT_SOURCES
         src/restructuring_breaking.h
         src/aggregate_deposition.cpp
         src/aggregate_deposition.h
+        src/anchored_restructuring_fixed_fraction.cpp
+        src/anchored_restructuring_fixed_fraction.h
         src/simulation.h
         src/simulation.cpp
         src/config.h

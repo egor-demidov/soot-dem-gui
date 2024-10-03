@@ -49,10 +49,11 @@
 #include "restructuring_breaking.h"
 #include "aggregation.h"
 #include "aggregate_deposition.h"
+#include "anchored_restructuring_fixed_fraction.h"
 
 #include "config.h"
 
-#define ENABLED_SIMULATIONS RestructuringFixedFractionSimulation, RestructuringBreakingSimulation, AggregationSimulation, AggregateDepositionSimulation
+#define ENABLED_SIMULATIONS RestructuringFixedFractionSimulation, RestructuringBreakingSimulation, AggregationSimulation, AggregateDepositionSimulation, AnchoredRestructuringFixedFractionSimulation
 
 template<typename T1, typename T2>
 inline void set_enabled(T1 * obj1, T2 * obj2, bool state) {
@@ -965,7 +966,7 @@ void MainWindow::initialize_preview(
         vtkSmartPointer<vtkActor> actor = vtkNew<vtkActor>();
         actor->SetMapper(mapper);
 
-        actor->GetProperty()->SetColor(vtk_named_colors->GetColor3d("DimGray").GetData());
+        actor->GetProperty()->SetColor(vtk_named_colors->GetColor3d("Gainsboro").GetData());
 
         vtk_renderer->AddActor(actor);
         vtk_polygons_representation.emplace_back(std::make_tuple(points, polygon, cell_array, poly_data, mapper, actor));

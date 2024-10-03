@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<simulation type="gui_deposition">
+<simulation type="gui_anchored_restructuring">
     <let id="A" type="real">1e-19</let>
     <let id="A_substrate" type="real">1e-19</let>
     <let id="aggregate_path" type="path">aggregate.vtk</let>
@@ -7,6 +7,10 @@
     <let id="d_crit" type="real">1e-09</let>
     <let id="dt" type="real">5e-14</let>
     <let id="dump_period" type="integer">10000</let>
+    <let id="f_coat_cutoff" type="real">5.6e-08</let>
+    <let id="f_coat_drop_rate" type="real">1.78571e+08</let>
+    <let id="f_coat_max" type="real">1e-09</let>
+    <let id="frac_necks" type="real">0.5</let>
     <let id="gamma_n" type="real">5e-09</let>
     <let id="gamma_n_bond" type="real">1.25e-07</let>
     <let id="gamma_n_substrate" type="real">5e-09</let>
@@ -49,9 +53,5 @@
     <let id="r_part" type="real">1.4e-08</let>
     <let id="r_verlet" type="real">7e-08</let>
     <let id="rho" type="real">1700</let>
-    <let id="rot_x" type="real">90</let>
-    <let id="rot_y" type="real">0</let>
-    <let id="rot_z" type="real">0</let>
     <let id="substrate_size" type="real">9e-07</let>
-    <let id="vz0" type="real">1</let>
 </simulation>
