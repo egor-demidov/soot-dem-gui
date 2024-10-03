@@ -135,12 +135,13 @@ public:
     static constexpr const char * DESCRIPTION = "An aggregate is loaded\n"
                                                 "and necks are inserted between\n"
                                                 "neighboring primary particles.\n"
-                                                "A prescribed fraction of necks\n"
-                                                "is broken randomly and capillary\n"
-                                                "force is applied to primary particles\n"
-                                                "to induce restructuring\n\n"
-                                                "This simulates restructuring\n"
-                                                "of thinly-coated soot aggregates";
+                                                "The aggregate moves towards a\n"
+                                                "rectangular substrate with a\n"
+                                                "prescribed initial velocity,\n"
+                                                "collides with it and adheres\n"
+                                                "to it\n\n"
+                                                "This simulates deposition\n"
+                                                "of soot aggregates on a surface";
 
     static constexpr std::tuple<const char *, ParameterType, const char *> PARAMETERS[] {
             {"A", REAL, "Hamaker constant"},
