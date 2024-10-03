@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
 {
     QSurfaceFormat::setDefaultFormat(QVTKOpenGLNativeWidget::defaultFormat());
     qRegisterMetaType<QVector<int> >("QVector<Eigen::Vector3d>");
+    qRegisterMetaType<QVector<int> >("QVector<QVector<Eigen::Vector3d>>");
     QIcon::setThemeName("light");
     QApplication a(argc, argv);
     a.setAttribute(Qt::AA_SynthesizeMouseForUnhandledTouchEvents, false);

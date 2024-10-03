@@ -80,7 +80,8 @@ AggregateDepositionSimulation::AggregateDepositionSimulation(
 bool
 AggregateDepositionSimulation::initialize(std::ostream &output_stream, std::vector<Eigen::Vector3d> &x0_buffer,
                                                  std::vector<Eigen::Vector3d> &neck_positions_buffer,
-                                                 std::vector<Eigen::Vector3d> &neck_orientations_buffer) {
+                                                 std::vector<Eigen::Vector3d> &neck_orientations_buffer,
+                                                 std::vector<std::vector<Eigen::Vector3d>> & polygons) {
 
     // General parameters
     auto rho = get_real_parameter("rho");
@@ -161,6 +162,13 @@ AggregateDepositionSimulation::initialize(std::ostream &output_stream, std::vect
     mass = 4.0 / 3.0 * M_PI * pow(r_part, 3.0) * rho;
     inertia = 2.0 / 5.0 * mass * pow(r_part, 2.0);
 
+    polygons.emplace_back(std::vector<Eigen::Vector3d>{
+        std::get<0>(substrate_vertices) / r_part,
+        std::get<1>(substrate_vertices) / r_part,
+        std::get<2>(substrate_vertices) / r_part,
+        std::get<3>(substrate_vertices) / r_part
+    });
+
     // Declare the initial condition buffers
     std::vector<Eigen::Vector3d> x0, v0, theta0, omega0;
 
@@ -231,7 +239,6 @@ AggregateDepositionSimulation::initialize(std::ostream &output_stream, std::vect
                                             phi_r_substrate, k_o_substrate, gamma_o_substrate,
                                             mu_o_substrate, phi_o_substrate, A_substrate, h0_substrate, r_part, mass, inertia, dt, Eigen::Vector3d::Zero(), 0.0);
 
-
     unary_force_container = std::make_unique<unary_force_container_t>(*substrate_model);
 
     binary_force_container = std::make_unique<binary_force_container_t>(*aggregate_model);
@@ -260,7 +267,7 @@ AggregateDepositionSimulation::initialize(std::ostream &output_stream, std::vect
     return true;
 }
 
-std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>> AggregateDepositionSimulation::perform_iterations() {
+std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>, std::vector<std::vector<Eigen::Vector3d>>> AggregateDepositionSimulation::perform_iterations() {
 
     std::vector<Eigen::Vector3d> x_before_iter = granular_system->get_x();
 
@@ -304,5 +311,5 @@ std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3
 
     auto [neck_positions, neck_orientations] = get_neck_information();
 
-    return {message_out.str(), granular_system->get_x(), neck_positions, neck_orientations};
+    return {message_out.str(), granular_system->get_x(), neck_positions, neck_orientations, {}};
 }

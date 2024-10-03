@@ -69,13 +69,15 @@ public:
     bool initialize(std::ostream & output_stream,
                     std::vector<Eigen::Vector3d> & x0_buffer,
                     std::vector<Eigen::Vector3d> & neck_positions_buffer,
-                    std::vector<Eigen::Vector3d> & neck_orientations_buffer) override;
+                    std::vector<Eigen::Vector3d> & neck_orientations_buffer,
+                    std::vector<std::vector<Eigen::Vector3d>> & polygons) override;
 
     std::tuple<
         std::string,
         std::vector<Eigen::Vector3d>,
         std::vector<Eigen::Vector3d>,
-        std::vector<Eigen::Vector3d>> perform_iterations() override;
+        std::vector<Eigen::Vector3d>,
+        std::vector<std::vector<Eigen::Vector3d>>> perform_iterations() override;
 
     static constexpr const char * config_file_signature = "gui_aggregation";
     static constexpr const char * combo_label = "Aggregation";

@@ -52,7 +52,7 @@
 
 #include "config.h"
 
-#define ENABLED_SIMULATIONS RestructuringFixedFractionSimulation, RestructuringBreakingSimulation, AggregationSimulation//, AggregateDepositionSimulation
+#define ENABLED_SIMULATIONS RestructuringFixedFractionSimulation, RestructuringBreakingSimulation, AggregationSimulation, AggregateDepositionSimulation
 
 template<typename T1, typename T2>
 inline void set_enabled(T1 * obj1, T2 * obj2, bool state) {
@@ -255,6 +255,7 @@ MainWindow::MainWindow(QWidget *parent)
     vtk_renderer = vtkNew<vtkRenderer>();
     vtk_renderer->SetBackground(vtk_named_colors->GetColor3d("White").GetData());
     vtk_render_window->AddRenderer(vtk_renderer);
+
     vtk_sphere_source = vtkNew<vtkSphereSource>();
     vtk_sphere_source->SetRadius(1.0);
     vtk_sphere_source->SetPhiResolution(30);
@@ -265,36 +266,36 @@ MainWindow::MainWindow(QWidget *parent)
     vtk_cylinder_source->SetHeight(1.5);
     vtk_cylinder_source->SetResolution(30);
 
-//    vtkNew<vtkPoints> points;
-//    points->InsertNextPoint(0.0, 0.0, 0.0);
-//    points->InsertNextPoint(1.0, 0.0, 0.0);
-//    points->InsertNextPoint(1.0, 1.0, 0.0);
-//    points->InsertNextPoint(0.0, 1.0, 0.0);
-//
-//    vtkNew<vtkPolygon> polygon;
-//    polygon->GetPointIds()->SetNumberOfIds(4); // make a quad
-//    polygon->GetPointIds()->SetId(0, 0);
-//    polygon->GetPointIds()->SetId(1, 1);
-//    polygon->GetPointIds()->SetId(2, 2);
-//    polygon->GetPointIds()->SetId(3, 3);
-//
-//    // Add the polygon to a list of polygons
-//    vtkNew<vtkCellArray> polygons;
-//    polygons->InsertNextCell(polygon);
-//
-//    // Create a PolyData
-//    vtkNew<vtkPolyData> polygonPolyData;
-//    polygonPolyData->SetPoints(points);
-//    polygonPolyData->SetPolys(polygons);
-//
-//    // Create a mapper and actor
-//    vtkNew<vtkPolyDataMapper> mapper;
-//    mapper->SetInputData(polygonPolyData);
-//
-//    vtkNew<vtkActor> actor;
-//    actor->SetMapper(mapper);
-//
-//    vtk_renderer->AddActor(actor);
+    // vtkNew<vtkPoints> points;
+    // points->InsertNextPoint(0.0, 0.0, 0.0);
+    // points->InsertNextPoint(1.0, 0.0, 0.0);
+    // points->InsertNextPoint(1.0, 1.0, 0.0);
+    // points->InsertNextPoint(0.0, 1.0, 0.0);
+    //
+    // vtkNew<vtkPolygon> polygon;
+    // polygon->GetPointIds()->SetNumberOfIds(4); // make a quad
+    // polygon->GetPointIds()->SetId(0, 0);
+    // polygon->GetPointIds()->SetId(1, 1);
+    // polygon->GetPointIds()->SetId(2, 2);
+    // polygon->GetPointIds()->SetId(3, 3);
+    //
+    // // Add the polygon to a list of polygons
+    // vtkNew<vtkCellArray> polygons;
+    // polygons->InsertNextCell(polygon);
+    //
+    // // Create a PolyData
+    // vtkNew<vtkPolyData> polygonPolyData;
+    // polygonPolyData->SetPoints(points);
+    // polygonPolyData->SetPolys(polygons);
+    //
+    // // Create a mapper and actor
+    // vtkNew<vtkPolyDataMapper> mapper;
+    // mapper->SetInputData(polygonPolyData);
+    //
+    // vtkNew<vtkActor> actor;
+    // actor->SetMapper(mapper);
+    //
+    // vtk_renderer->AddActor(actor);
 }
 
 template<typename SimulationType>
@@ -450,13 +451,15 @@ bool MainWindow::initialize_simulation() {
 
     std::stringstream ss;
     std::vector<Eigen::Vector3d> neck_positions_buffer, neck_orientations_buffer;
+    std::vector<std::vector<Eigen::Vector3d>> polygon_buffer;
 
     simulation = std::make_shared<SimulationType>(parameter_heap, std::filesystem::path(configurations_file_path.toStdString()).parent_path());
 
     if (!simulation->initialize(ss,
                                 this->particle_positions,
                                 neck_positions_buffer,
-                                neck_orientations_buffer)) {
+                                neck_orientations_buffer,
+                                polygon_buffer)) {
 
         unlock_parameters();
         return false;
@@ -466,7 +469,7 @@ bool MainWindow::initialize_simulation() {
 
     compute_thread.initialize(simulation);
 
-    initialize_preview(this->particle_positions, neck_positions_buffer, neck_orientations_buffer);
+    initialize_preview(this->particle_positions, neck_positions_buffer, neck_orientations_buffer, polygon_buffer);
 
     return true;
 }
@@ -861,7 +864,8 @@ void MainWindow::update_tool_buttons() {
 void MainWindow::compute_step_done(QString const & message,
                                    QVector<Eigen::Vector3d> const & x,
                                    QVector<Eigen::Vector3d> const & neck_positions,
-                                   QVector<Eigen::Vector3d> const & neck_orientations) {
+                                   QVector<Eigen::Vector3d> const & neck_orientations,
+                                   QVector<QVector<Eigen::Vector3d>> const & polygons) {
 
     ui->stdoutBox->appendPlainText(message);
 
@@ -872,9 +876,15 @@ void MainWindow::compute_step_done(QString const & message,
 
     this->particle_positions = std::vector<Eigen::Vector3d>(x.begin(), x.end());
 
+    std::vector<std::vector<Eigen::Vector3d>> polygons_std_vector(polygons.size());
+    for (long i = 0; i < polygons.size(); i ++) {
+        polygons_std_vector[i] = std::vector<Eigen::Vector3d>(polygons[i].begin(), polygons[i].end());
+    }
+
     update_preview(this->particle_positions,
                    std::vector<Eigen::Vector3d>(neck_positions.begin(), neck_positions.end()),
-                   std::vector<Eigen::Vector3d>(neck_orientations.begin(), neck_orientations.end()));
+                   std::vector<Eigen::Vector3d>(neck_orientations.begin(), neck_orientations.end()),
+                   polygons_std_vector);
 }
 
 void MainWindow::pause_done() {
@@ -885,7 +895,8 @@ void MainWindow::pause_done() {
 void MainWindow::initialize_preview(
         std::vector<Eigen::Vector3d> const & x,
         std::vector<Eigen::Vector3d> const & neck_positions,
-        std::vector<Eigen::Vector3d> const & neck_orientations) {
+        std::vector<Eigen::Vector3d> const & neck_orientations,
+        std::vector<std::vector<Eigen::Vector3d>> const & polygons) {
 
     // Initialize particle representations
     vtk_particles_representation.reserve(x.size());
@@ -903,8 +914,6 @@ void MainWindow::initialize_preview(
         vtk_renderer->AddActor(actor);
         vtk_particles_representation.emplace_back(mapper, actor);
     }
-    vtk_renderer->ResetCamera();
-    vtk_render_window->Render();
 
     // Initialize neck representations
     vtk_necks_representation.reserve(neck_positions.size());
@@ -928,6 +937,40 @@ void MainWindow::initialize_preview(
         vtk_renderer->AddActor(actor);
         vtk_necks_representation.emplace_back(mapper, actor);
     }
+
+    // Initialize polygons
+    vtk_polygons_representation.reserve(polygons.size());
+    for (size_t i = 0; i < polygons.size(); i ++) {
+        vtkSmartPointer<vtkPoints> points = vtkNew<vtkPoints>();
+        for (Eigen::Vector3d const & point : polygons[i]) {
+            points->InsertNextPoint(point[0], point[1], point[2]);
+        }
+
+        vtkSmartPointer<vtkPolygon> polygon = vtkNew<vtkPolygon>();
+        polygon->GetPointIds()->SetNumberOfIds(polygons[i].size());
+        for (size_t j = 0; j < polygons[i].size(); j ++) {
+            polygon->GetPointIds()->SetId(j, j);
+        }
+
+        vtkSmartPointer<vtkCellArray> cell_array = vtkNew<vtkCellArray>();
+        cell_array->InsertNextCell(polygon);
+
+        vtkSmartPointer<vtkPolyData> poly_data = vtkNew<vtkPolyData>();
+        poly_data->SetPoints(points);
+        poly_data->SetPolys(cell_array);
+
+        vtkSmartPointer<vtkPolyDataMapper> mapper = vtkNew<vtkPolyDataMapper>();
+        mapper->SetInputData(poly_data);
+
+        vtkSmartPointer<vtkActor> actor = vtkNew<vtkActor>();
+        actor->SetMapper(mapper);
+
+        actor->GetProperty()->SetColor(vtk_named_colors->GetColor3d("DimGray").GetData());
+
+        vtk_renderer->AddActor(actor);
+        vtk_polygons_representation.emplace_back(std::make_tuple(points, polygon, cell_array, poly_data, mapper, actor));
+    }
+
     vtk_renderer->ResetCamera();
     vtk_render_window->Render();
 }
@@ -935,7 +978,8 @@ void MainWindow::initialize_preview(
 // ASSUMING NECK COUNT CAN ONLY DECREASE
 void MainWindow::update_preview(std::vector<Eigen::Vector3d> const & x,
                                 std::vector<Eigen::Vector3d> const & neck_positions,
-                                std::vector<Eigen::Vector3d> const & neck_orientations) {
+                                std::vector<Eigen::Vector3d> const & neck_orientations,
+                                std::vector<std::vector<Eigen::Vector3d>> const & polygons) {
 
     // Delete necks that have been broken
 
@@ -967,8 +1011,12 @@ void MainWindow::reset_preview() {
     for (auto const & [mapper, actor] : vtk_necks_representation) {
         vtk_renderer->RemoveActor(actor);
     }
+    for (auto const & [points, polygon, cell_array, poly_data, mapper, actor] : vtk_polygons_representation) {
+        vtk_renderer->RemoveActor(actor);
+    }
     vtk_necks_representation.clear();
     vtk_particles_representation.clear();
+    vtk_polygons_representation.clear();
     vtk_render_window->Render();
 }
 

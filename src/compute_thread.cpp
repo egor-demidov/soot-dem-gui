@@ -105,11 +105,18 @@ void ComputeThread::run() {
         mutex.unlock();
 
         if (current_state == ADVANCE_ONE || current_state == ADVANCE_CONTINUOUS) {
-            auto [message, x, neck_positions, neck_orientations] = simulation->perform_iterations();
+            auto [message, x, neck_positions, neck_orientations, polygons] = simulation->perform_iterations();
+            QVector<QVector<Eigen::Vector3d>> polygons_qvector;
+            polygons_qvector.resize(polygons.size());
+            for (long i = 0; i < polygons.size(); i ++) {
+                polygons_qvector[i] = QVector<Eigen::Vector3d>(polygons[i].begin(), polygons[i].end());
+            }
+
             emit step_done(QString::fromStdString(message),
                            QVector<Eigen::Vector3d>(x.begin(), x.end()),
                            QVector<Eigen::Vector3d>(neck_positions.begin(), neck_positions.end()),
-                           QVector<Eigen::Vector3d>(neck_orientations.begin(), neck_orientations.end()));
+                           QVector<Eigen::Vector3d>(neck_orientations.begin(), neck_orientations.end()),
+                           polygons_qvector);
 
             if (current_state == ADVANCE_ONE) {
                 mutex.lock();

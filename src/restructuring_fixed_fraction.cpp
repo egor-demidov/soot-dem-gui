@@ -27,7 +27,8 @@ RestructuringFixedFractionSimulation::RestructuringFixedFractionSimulation(
 bool
 RestructuringFixedFractionSimulation::initialize(std::ostream &output_stream, std::vector<Eigen::Vector3d> &x0_buffer,
                                                  std::vector<Eigen::Vector3d> &neck_positions_buffer,
-                                                 std::vector<Eigen::Vector3d> &neck_orientations_buffer) {
+                                                 std::vector<Eigen::Vector3d> &neck_orientations_buffer,
+                                                 std::vector<std::vector<Eigen::Vector3d>> & polygons) {
     auto rng_seed = get_integer_parameter("rng_seed");
 
     // General parameters
@@ -199,7 +200,7 @@ std::tuple<std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>> Restructu
     return std::make_tuple(neck_positions, neck_orientations);
 }
 
-std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>> RestructuringFixedFractionSimulation::perform_iterations() {
+std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>, std::vector<std::vector<Eigen::Vector3d>>> RestructuringFixedFractionSimulation::perform_iterations() {
 
     std::vector<Eigen::Vector3d> x_before_iter = granular_system->get_x();
 
@@ -243,5 +244,5 @@ std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3
 
     auto [neck_positions, neck_orientations] = get_neck_information();
 
-    return {message_out.str(), granular_system->get_x(), neck_positions, neck_orientations};
+    return {message_out.str(), granular_system->get_x(), neck_positions, neck_orientations, {}};
 }

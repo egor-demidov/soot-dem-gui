@@ -28,7 +28,8 @@ RestructuringBreakingSimulation::RestructuringBreakingSimulation(
 bool
 RestructuringBreakingSimulation::initialize(std::ostream &output_stream, std::vector<Eigen::Vector3d> &x0_buffer,
                                                  std::vector<Eigen::Vector3d> &neck_positions_buffer,
-                                                 std::vector<Eigen::Vector3d> &neck_orientations_buffer) {
+                                                 std::vector<Eigen::Vector3d> &neck_orientations_buffer,
+                                                 std::vector<std::vector<Eigen::Vector3d>> & polygons) {
     // General parameters
     auto rho = get_real_parameter("rho");
     auto r_verlet = get_real_parameter("r_verlet");
@@ -203,7 +204,7 @@ std::tuple<std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>> Restructu
     return std::make_tuple(neck_positions, neck_orientations);
 }
 
-std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>> RestructuringBreakingSimulation::perform_iterations() {
+std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>, std::vector<std::vector<Eigen::Vector3d>>> RestructuringBreakingSimulation::perform_iterations() {
 
     std::vector<Eigen::Vector3d> x_before_iter = granular_system->get_x();
 
@@ -260,5 +261,5 @@ std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3
                    granular_system->get_omega(), granular_system->get_alpha(), r_part);
     dump_necks(dump_directory.string(), current_step / dump_period, granular_system->get_x(), aggregate_model->get_bonded_contacts(), r_part);
 
-    return {message_out.str(), granular_system->get_x(), neck_positions, neck_orientations};
+    return {message_out.str(), granular_system->get_x(), neck_positions, neck_orientations, {}};
 }

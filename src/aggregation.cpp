@@ -69,7 +69,8 @@ AggregationSimulation::AggregationSimulation(
 
 bool AggregationSimulation::initialize(std::ostream &output_stream, std::vector<Eigen::Vector3d> &x0_buffer,
                                        std::vector<Eigen::Vector3d> &neck_positions_buffer,
-                                       std::vector<Eigen::Vector3d> &neck_orientations_buffer) {
+                                       std::vector<Eigen::Vector3d> &neck_orientations_buffer,
+                                       std::vector<std::vector<Eigen::Vector3d>> & polygons) {
     auto rng_seed = get_integer_parameter("rng_seed");
 
     // General parameters
@@ -171,7 +172,7 @@ bool AggregationSimulation::initialize(std::ostream &output_stream, std::vector<
     return true;
 }
 
-std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>> AggregationSimulation::perform_iterations() {
+std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3d>, std::vector<std::vector<Eigen::Vector3d>>> AggregationSimulation::perform_iterations() {
 
     std::vector<Eigen::Vector3d> x_before_iter = granular_system->get_x();
 
@@ -213,5 +214,5 @@ std::tuple<std::string, std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector3
                    granular_system->get_v(), granular_system->get_a(),
                    granular_system->get_omega(), granular_system->get_alpha(), r_part);
 
-    return {message_out.str(), granular_system->get_x(), {}, {}};
+    return {message_out.str(), granular_system->get_x(), {}, {}, {}};
 }

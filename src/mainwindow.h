@@ -33,6 +33,10 @@
 #include <vtkActor.h>
 #include <vtkGenericOpenGLRenderWindow.h>
 #include <vtkNamedColors.h>
+#include <vtkPolygon.h>
+#include <vtkCellArray.h>
+#include <vtkPolyData.h>
+
 
 #include "compute_thread.h"
 
@@ -68,7 +72,8 @@ private slots:
     void compute_step_done(QString const & message,
                            QVector<Eigen::Vector3d> const & x,
                            QVector<Eigen::Vector3d> const & neck_positions,
-                           QVector<Eigen::Vector3d> const & neck_orientations);
+                           QVector<Eigen::Vector3d> const & neck_orientations,
+                           QVector<QVector<Eigen::Vector3d>> const & polygons = {});
 
     void about_simulation_handler();
     void about_dialog_handler();
@@ -105,10 +110,12 @@ private:
     void initialize_preview(
             std::vector<Eigen::Vector3d> const & x,
             std::vector<Eigen::Vector3d> const & neck_positions,
-            std::vector<Eigen::Vector3d> const & neck_orientations);
+            std::vector<Eigen::Vector3d> const & neck_orientations,
+            std::vector<std::vector<Eigen::Vector3d>> const & polygons);
     void update_preview(std::vector<Eigen::Vector3d> const & x,
                         std::vector<Eigen::Vector3d> const & neck_positions,
-                        std::vector<Eigen::Vector3d> const & neck_orientations);
+                        std::vector<Eigen::Vector3d> const & neck_orientations,
+                        std::vector<std::vector<Eigen::Vector3d>> const & polygons);
     void reset_preview();
 
     enum SimulationState {
@@ -146,6 +153,16 @@ private:
             vtkSmartPointer<vtkPolyDataMapper>,
             vtkSmartPointer<vtkActor>
          >> vtk_necks_representation;
+
+    // Polygons in VTK
+    std::vector<std::tuple<
+        vtkSmartPointer<vtkPoints>,
+        vtkSmartPointer<vtkPolygon>,
+        vtkSmartPointer<vtkCellArray>,
+        vtkSmartPointer<vtkPolyData>,
+        vtkSmartPointer<vtkPolyDataMapper>,
+        vtkSmartPointer<vtkActor>
+        >> vtk_polygons_representation;
 };
 
 #endif // MAINWINDOW_H
